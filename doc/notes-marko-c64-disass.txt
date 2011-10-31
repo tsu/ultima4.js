@@ -1,0 +1,217 @@
+
+.C:0c72   20 90 0F   JSR $0F90    ; <-- 0ae4:  JSR $0C72
+.C:0c75   20 65 18   JSR $1865
+.C:0c78   38         SEC
+.C:0c79   A5 12      LDA $12
+.C:0c7b   E9 05      SBC #$05
+.C:0c7d   85 40      STA $40
+.C:0c7f   38         SEC
+.C:0c80   A5 13      LDA $13
+.C:0c82   E9 05      SBC #$05
+.C:0c84   85 41      STA $41
+.C:0c86   A9 00      LDA #$00
+.C:0c88   85 42      STA $42
+.C:0c8a   85 43      STA $43
+.C:0c8c   A8         TAY
+.C:0c8d   AA         TAX
+.C:0c8e   18         CLC
+.C:0c8f   A5 40      LDA $40
+.C:0c91   65 42      ADC $42
+.C:0c93   85 44      STA $44
+.C:0c95   18         CLC
+.C:0c96   A5 41      LDA $41
+.C:0c98   65 43      ADC $43
+.C:0c9a   85 45      STA $45
+...
+
+;; Copy tile bits to screen. Uses and restores zero-page pointers at 
+;;    $58, $59   ; ???
+;;    $7c, $7d   ; Pointer to screen bitmap 
+;;    $7e, $7f   ; Pointer to tile bitmaps
+
+
+.C:0e5b   C6 70      DEC $70    ; <-- 0df8: BNE 0e5b
+.C:0e5d   C6 44      DEC $44
+.C:0e5f   10 85      BPL $0DE6
+.C:0e61   A9 0A      LDA #$0A
+.C:0e63   85 44      STA $44
+.C:0e65   C6 45      DEC $45
+.C:0e67   30 03      BMI $0E6C
+.C:0e69   4C E6 0D   JMP $0DE6
+.C:0e6c   A5 7E      LDA $7E
+.C:0e6e   48         PHA
+.C:0e6f   A5 7F      LDA $7F
+.C:0e71   48         PHA
+.C:0e72   A5 7C      LDA $7C
+.C:0e74   48         PHA
+.C:0e75   A5 7D      LDA $7D
+.C:0e77   48         PHA
+.C:0e78   A5 58      LDA $58
+.C:0e7a   48         PHA
+.C:0e7b   A5 59      LDA $59
+.C:0e7d   48         PHA
+.C:0e7e   A9 00      LDA #$00
+.C:0e80   8D AE 0E   STA $0EAE
+.C:0e83   A9 29      LDA #$29
+.C:0e85   85 58      STA $58
+.C:0e87   A9 04      LDA #$04
+.C:0e89   85 59      STA $59
+.C:0e8b   A0 08      LDY #$08
+.C:0e8d   B9 00 E0   LDA $E000,Y
+.C:0e90   85 7C      STA $7C
+.C:0e92   B9 C0 E0   LDA $E0C0,Y
+.C:0e95   85 7D      STA $7D
+.C:0e97   A5 7C      LDA $7C
+.C:0e99   18         CLC
+.C:0e9a   69 08      ADC #$08
+.C:0e9c   85 7C      STA $7C
+.C:0e9e   A5 7D      LDA $7D
+.C:0ea0   69 00      ADC #$00
+.C:0ea2   85 7D      STA $7D
+.C:0ea4   A9 00      LDA #$00
+.C:0ea6   85 72      STA $72
+.C:0ea8   A9 00      LDA #$00
+.C:0eaa   8D 56 0F   STA $0F56
+.C:0ead   AC 79 AE   LDY $AE79
+.C:0eb0   98         TYA
+.C:0eb1   48         PHA
+.C:0eb2   20 8B 14   JSR $148B
+.C:0eb5   AD 56 0F   LDA $0F56
+.C:0eb8   38         SEC
+.C:0eb9   0A         ASL A
+.C:0eba   A8         TAY
+.C:0ebb   68         PLA
+.C:0ebc   AA         TAX
+.C:0ebd   BD B0 E1   LDA $E1B0,X
+.C:0ec0   91 58      STA ($58),Y
+.C:0ec2   C8         INY
+.C:0ec3   91 58      STA ($58),Y
+.C:0ec5   48         PHA
+.C:0ec6   98         TYA
+.C:0ec7   18         CLC
+.C:0ec8   69 27      ADC #$27
+.C:0eca   A8         TAY
+.C:0ecb   68         PLA
+.C:0ecc   91 58      STA ($58),Y
+.C:0ece   C8         INY
+.C:0ecf   91 58      STA ($58),Y
+.C:0ed1   A0 0F      LDY #$0F
+.C:0ed3   B1 7E      LDA ($7E),Y
+.C:0ed5   91 7C      STA ($7C),Y
+.C:0ed7   88         DEY
+.C:0ed8   10 F9      BPL $0ED3
+.C:0eda   A5 7F      LDA $7F
+.C:0edc   49 70      EOR #$70
+.C:0ede   85 7F      STA $7F
+.C:0ee0   A5 7C      LDA $7C
+.C:0ee2   48         PHA
+.C:0ee3   18         CLC
+.C:0ee4   69 40      ADC #$40
+.C:0ee6   85 7C      STA $7C
+.C:0ee8   A5 7D      LDA $7D
+.C:0eea   48         PHA
+.C:0eeb   69 01      ADC #$01
+.C:0eed   85 7D      STA $7D
+.C:0eef   A0 0F      LDY #$0F
+.C:0ef1   B1 7E      LDA ($7E),Y
+.C:0ef3   91 7C      STA ($7C),Y
+.C:0ef5   88         DEY
+.C:0ef6   10 F9      BPL $0EF1
+.C:0ef8   A5 7F      LDA $7F
+.C:0efa   49 70      EOR #$70
+.C:0efc   85 7F      STA $7F
+.C:0efe   68         PLA
+.C:0eff   85 7D      STA $7D
+.C:0f01   68         PLA
+.C:0f02   85 7C      STA $7C
+.C:0f04   EE AE 0E   INC $0EAE
+.C:0f07   A5 7C      LDA $7C
+.C:0f09   18         CLC
+.C:0f0a   69 10      ADC #$10
+.C:0f0c   85 7C      STA $7C
+.C:0f0e   A5 7D      LDA $7D
+.C:0f10   69 00      ADC #$00
+.C:0f12   85 7D      STA $7D
+.C:0f14   EE 56 0F   INC $0F56
+.C:0f17   AD 56 0F   LDA $0F56
+.C:0f1a   C9 0B      CMP #$0B
+.C:0f1c   D0 8F      BNE $0EAD
+.C:0f1e   A5 58      LDA $58
+.C:0f20   18         CLC
+.C:0f21   69 50      ADC #$50
+.C:0f23   85 58      STA $58
+.C:0f25   A5 59      LDA $59
+.C:0f27   69 00      ADC #$00
+.C:0f29   85 59      STA $59
+.C:0f2b   A5 7C      LDA $7C
+.C:0f2d   18         CLC
+.C:0f2e   69 D0      ADC #$D0
+.C:0f30   85 7C      STA $7C
+.C:0f32   A5 7D      LDA $7D
+.C:0f34   69 01      ADC #$01
+.C:0f36   85 7D      STA $7D
+.C:0f38   E6 72      INC $72
+.C:0f3a   A5 72      LDA $72
+.C:0f3c   C9 0B      CMP #$0B
+.C:0f3e   F0 03      BEQ $0F43
+.C:0f40   4C A8 0E   JMP $0EA8
+.C:0f43   68         PLA
+.C:0f44   85 59      STA $59
+.C:0f46   68         PLA
+.C:0f47   85 58      STA $58
+.C:0f49   68         PLA
+.C:0f4a   85 7D      STA $7D
+.C:0f4c   68         PLA
+.C:0f4d   85 7C      STA $7C
+.C:0f4f   68         PLA
+.C:0f50   85 7F      STA $7F
+.C:0f52   68         PLA
+.C:0f53   85 7E      STA $7E
+.C:0f55   60         RTS        ; return
+
+
+
+
+;; JSR $0b15
+.C:0b15   A5 1E      LDA $1E
+.C:0b17   C9 18      CMP #$18
+.C:0b19   D0 24      BNE $0B3F
+.C:0b1b   A5 74      LDA $74
+.C:0b1d   F0 20      BEQ $0B3F
+.C:0b1f   CE 40 0B   DEC $0B40
+.C:0b22   AD 40 0B   LDA $0B40
+.C:0b25   29 03      AND #$03
+.C:0b27   D0 16      BNE $0B3F
+.C:0b29   A6 75      LDX $75
+.C:0b2b   D0 03      BNE $0B30
+.C:0b2d   4C 99 08   JMP $0899
+.C:0b30   CA         DEX
+.C:0b31   D0 03      BNE $0B36
+.C:0b33   4C E0 08   JMP $08E0
+.C:0b36   CA         DEX
+.C:0b37   D0 03      BNE $0B3C
+.C:0b39   4C BD 08   JMP $08BD
+.C:0b3c   4C 04 09   JMP $0904
+.C:0b3f   60         RTS
+   0b40   XX                    ; data
+
+C:0ae1   20 15 0B   JSR $0B15
+C:0ae4   20 72 0C   JSR $0C72
+
+;; Zero page
+$10
+$11
+$12
+$13
+$14
+$15
+$1E
+$58,$59 ; 
+$60
+$61
+$62
+$63
+$74
+$75  
+$7C,$7D ; blt dst
+$7E,$7F ; blt src
