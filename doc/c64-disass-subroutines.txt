@@ -1,0 +1,105 @@
+--- 0B15
+.C:0b15   A5 1E      LDA $1E
+.C:0b17   C9 18      CMP #$18
+.C:0b19   D0 24      BNE $0B3F
+.C:0b1b   A5 74      LDA $74
+.C:0b1d   F0 20      BEQ $0B3F
+.C:0b1f   CE 40 0B   DEC $0B40
+.C:0b22   AD 40 0B   LDA $0B40
+.C:0b25   29 03      AND #$03
+.C:0b27   D0 16      BNE $0B3F
+.C:0b29   A6 75      LDX $75
+.C:0b2b   D0 03      BNE $0B30
+.C:0b2d   4C 99 08   JMP $0899
+.C:0b30   CA         DEX
+.C:0b31   D0 03      BNE $0B36
+.C:0b33   4C E0 08   JMP $08E0
+.C:0b36   CA         DEX
+.C:0b37   D0 03      BNE $0B3C
+.C:0b39   4C BD 08   JMP $08BD
+.C:0b3c   4C 04 09   JMP $0904
+.C:0b3f   60         RTS          ; return
+   0b40   XX                      ; data
+
+
+--- 0F90
+.C:0f90   A2 00      LDX #$00
+.C:0f92   BD 60 AC   LDA $AC60,X
+.C:0f95   F0 58      BEQ $0FEF
+.C:0f97   10 37      BPL $0FD0
+.C:0f99   C9 90      CMP #$90
+.C:0f9b   B0 1B      BCS $0FB8
+.C:0f9d   C9 80      CMP #$80
+.C:0f9f   F0 53      BEQ $0FF4
+.C:0fa1   20 F5 15   JSR $15F5
+.C:0fa4   C9 C0      CMP #$C0
+.C:0fa6   B0 4C      BCS $0FF4
+.C:0fa8   BD 00 AC   LDA $AC00,X
+.C:0fab   49 01      EOR #$01
+.C:0fad   29 01      AND #$01
+.C:0faf   1D 60 AC   ORA $AC60,X
+.C:0fb2   9D 00 AC   STA $AC00,X
+.C:0fb5   4C F4 0F   JMP $0FF4
+.C:0fb8   20 F5 15   JSR $15F5
+.C:0fbb   C9 C0      CMP #$C0
+.C:0fbd   B0 35      BCS $0FF4
+.C:0fbf   BD 00 AC   LDA $AC00,X
+.C:0fc2   18         CLC
+.C:0fc3   69 01      ADC #$01
+.C:0fc5   29 03      AND #$03
+.C:0fc7   1D 60 AC   ORA $AC60,X
+.C:0fca   9D 00 AC   STA $AC00,X
+.C:0fcd   4C F4 0F   JMP $0FF4
+.C:0fd0   C9 50      CMP #$50
+.C:0fd2   90 07      BCC $0FDB
+.C:0fd4   C9 60      CMP #$60
+.C:0fd6   B0 0E      BCS $0FE6
+.C:0fd8   4C A1 0F   JMP $0FA1
+.C:0fdb   C9 20      CMP #$20
+.C:0fdd   90 07      BCC $0FE6
+.C:0fdf   C9 30      CMP #$30
+.C:0fe1   B0 03      BCS $0FE6
+.C:0fe3   4C A1 0F   JMP $0FA1
+.C:0fe6   BD 60 AC   LDA $AC60,X
+.C:0fe9   9D 00 AC   STA $AC00,X
+.C:0fec   4C F4 0F   JMP $0FF4
+.C:0fef   A9 00      LDA #$00
+.C:0ff1   9D 00 AC   STA $AC00,X
+.C:0ff4   E8         INX
+.C:0ff5   E0 20      CPX #$20
+.C:0ff7   90 99      BCC $0F92
+.C:0ff9   20 26 14   JSR $1426
+.C:0ffc   20 A9 14   JSR $14A9
+.C:0fff   4C 04 15   JMP $1504
+.C:1002   86 4E      STX $4E
+.C:1004   84 4F      STY $4F
+.C:1006   68         PLA
+.C:1007   8D 17 10   STA $1017
+.C:100a   68         PLA
+.C:100b   8D 18 10   STA $1018
+.C:100e   EE 17 10   INC $1017
+.C:1011   D0 03      BNE $1016
+.C:1013   EE 18 10   INC $1018
+.C:1016   AD B5 12   LDA $12B5
+.C:1019   F0 06      BEQ $1021
+.C:101b   20 2A 10   JSR $102A
+.C:101e   4C 0E 10   JMP $100E
+.C:1021   AD 18 10   LDA $1018
+.C:1024   48         PHA
+.C:1025   AD 17 10   LDA $1017
+.C:1028   48         PHA
+.C:1029   60         RTS        ; return
+
+
+--- ECC4
+.C:ecc4   A2 0B      LDX #$0B
+.C:ecc6   B5 30      LDA $30,X
+.C:ecc8   48         PHA
+.C:ecc9   BD D6 EC   LDA $ECD6,X
+.C:eccc   95 30      STA $30,X
+.C:ecce   68         PLA
+.C:eccf   9D D6 EC   STA $ECD6,X
+.C:ecd2   CA         DEX
+.C:ecd3   10 F1      BPL $ECC6
+.C:ecd5   60         RTS          ; return
+

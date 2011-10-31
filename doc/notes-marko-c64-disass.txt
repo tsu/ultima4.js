@@ -1,3 +1,5 @@
+;; Memory snapshots while game in world map -mode
+
 
 .C:0c72   20 90 0F   JSR $0F90    ; <-- 0ae4:  JSR $0C72
 .C:0c75   20 65 18   JSR $1865
@@ -22,10 +24,226 @@
 .C:0c96   A5 41      LDA $41
 .C:0c98   65 43      ADC $43
 .C:0c9a   85 45      STA $45
-...
+.C:0c9c   20 79 15   JSR $1579
+.C:0c9f   85 7C      STA $7C
+.C:0ca1   A5 44      LDA $44
+.C:0ca3   29 0F      AND #$0F
+.C:0ca5   05 7C      ORA $7C
+.C:0ca7   85 7C      STA $7C
+.C:0ca9   A5 45      LDA $45
+.C:0cab   29 10      AND #$10
+.C:0cad   0A         ASL A
+.C:0cae   05 44      ORA $44
+.C:0cb0   20 73 15   JSR $1573
+.C:0cb3   18         CLC
+.C:0cb4   69 E8      ADC #$E8
+.C:0cb6   85 7D      STA $7D
+.C:0cb8   B1 7C      LDA ($7C),Y
+.C:0cba   9D 80 AE   STA $AE80,X
+.C:0cbd   E8         INX
+.C:0cbe   E6 42      INC $42
+.C:0cc0   A5 42      LDA $42
+.C:0cc2   C9 0B      CMP #$0B
+.C:0cc4   D0 C8      BNE $0C8E
+.C:0cc6   84 42      STY $42
+.C:0cc8   E6 43      INC $43
+.C:0cca   A5 43      LDA $43
+.C:0ccc   C9 0B      CMP #$0B
+.C:0cce   D0 BE      BNE $0C8E
+.C:0cd0   A2 1F      LDX #$1F
+.C:0cd2   BD 00 AC   LDA $AC00,X
+.C:0cd5   F0 2D      BEQ $0D04
+.C:0cd7   BD 20 AC   LDA $AC20,X
+.C:0cda   18         CLC
+.C:0cdb   69 05      ADC #$05
+.C:0cdd   38         SEC
+.C:0cde   E5 10      SBC $10
+.C:0ce0   C9 0B      CMP #$0B
+.C:0ce2   B0 20      BCS $0D04
+.C:0ce4   85 44      STA $44
+.C:0ce6   BD 40 AC   LDA $AC40,X
+.C:0ce9   18         CLC
+.C:0cea   69 05      ADC #$05
+.C:0cec   38         SEC
+.C:0ced   E5 11      SBC $11
+.C:0cef   C9 0B      CMP #$0B
+.C:0cf1   B0 11      BCS $0D04
+.C:0cf3   85 45      STA $45
+.C:0cf5   A4 45      LDY $45
+.C:0cf7   B9 49 9F   LDA $9F49,Y
+.C:0cfa   18         CLC
+.C:0cfb   65 44      ADC $44
+.C:0cfd   A8         TAY
+.C:0cfe   BD 00 AC   LDA $AC00,X
+.C:0d01   99 80 AE   STA $AE80,Y
+.C:0d04   CA         DEX
+.C:0d05   10 CB      BPL $0CD2
+.C:0d07   A5 6D      LDA $6D
+.C:0d09   F0 2A      BEQ $0D35
+.C:0d0b   A5 6E      LDA $6E
+.C:0d0d   18         CLC
+.C:0d0e   69 05      ADC #$05
+.C:0d10   38         SEC
+.C:0d11   E5 10      SBC $10
+.C:0d13   C9 0B      CMP #$0B
+.C:0d15   B0 1E      BCS $0D35
+.C:0d17   85 44      STA $44
+.C:0d19   A5 6F      LDA $6F
+.C:0d1b   18         CLC
+.C:0d1c   69 05      ADC #$05
+.C:0d1e   38         SEC
+.C:0d1f   E5 11      SBC $11
+.C:0d21   C9 0B      CMP #$0B
+.C:0d23   B0 10      BCS $0D35
+.C:0d25   85 45      STA $45
+.C:0d27   A4 45      LDY $45
+.C:0d29   B9 49 9F   LDA $9F49,Y
+.C:0d2c   18         CLC
+.C:0d2d   65 44      ADC $44
+.C:0d2f   A8         TAY
+.C:0d30   A5 6D      LDA $6D
+.C:0d32   99 80 AE   STA $AE80,Y
+.C:0d35   AD B1 AE   LDA $AEB1
+.C:0d38   85 49      STA $49
+.C:0d3a   AD C7 AE   LDA $AEC7
+.C:0d3d   85 4A      STA $4A
+.C:0d3f   AD BD AE   LDA $AEBD
+.C:0d42   85 4B      STA $4B
+.C:0d44   AD BB AE   LDA $AEBB
+.C:0d47   85 4C      STA $4C
+.C:0d49   AD BC AE   LDA $AEBC
+.C:0d4c   85 48      STA $48
+.C:0d4e   A5 1E      LDA $1E
+.C:0d50   8D BC AE   STA $AEBC
+.C:0d53   A5 1D      LDA $1D
+.C:0d55   F0 0E      BEQ $0D65
+.C:0d57   A2 78      LDX #$78
+.C:0d59   BD 80 AE   LDA $AE80,X
+.C:0d5c   9D 00 AE   STA $AE00,X
+.C:0d5f   CA         DEX
+.C:0d60   10 F7      BPL $0D59
+.C:0d62   4C 6C 0E   JMP $0E6C
+.C:0d65   A2 78      LDX #$78
+.C:0d67   A9 7E      LDA #$7E
+.C:0d69   9D 00 AE   STA $AE00,X
+.C:0d6c   CA         DEX
+.C:0d6d   10 FA      BPL $0D69
+.C:0d6f   A9 78      LDA #$78
+.C:0d71   85 70      STA $70
+.C:0d73   A9 0A      LDA #$0A
+.C:0d75   85 44      STA $44
+.C:0d77   85 45      STA $45
+.C:0d79   A5 44      LDA $44
+.C:0d7b   85 40      STA $40
+.C:0d7d   A5 45      LDA $45
+.C:0d7f   85 41      STA $41
+.C:0d81   A5 70      LDA $70
+.C:0d83   85 71      STA $71
+.C:0d85   A6 40      LDX $40
+.C:0d87   A4 41      LDY $41
+.C:0d89   A5 71      LDA $71
+.C:0d8b   18         CLC
+.C:0d8c   7D 57 0F   ADC $0F57,X
+.C:0d8f   18         CLC
+.C:0d90   79 62 0F   ADC $0F62,Y
+.C:0d93   C9 3C      CMP #$3C
+.C:0d95   F0 2F      BEQ $0DC6
+.C:0d97   85 71      STA $71
+.C:0d99   AA         TAX
+.C:0d9a   BD 80 AE   LDA $AE80,X
+.C:0d9d   C9 06      CMP #$06
+.C:0d9f   F0 2D      BEQ $0DCE
+.C:0da1   C9 08      CMP #$08
+.C:0da3   F0 29      BEQ $0DCE
+.C:0da5   C9 49      CMP #$49
+.C:0da7   F0 25      BEQ $0DCE
+.C:0da9   C9 7E      CMP #$7E
+.C:0dab   F0 21      BEQ $0DCE
+.C:0dad   C9 7F      CMP #$7F
+.C:0daf   F0 1D      BEQ $0DCE
+.C:0db1   A5 40      LDA $40
+.C:0db3   AA         TAX
+.C:0db4   18         CLC
+.C:0db5   7D 57 0F   ADC $0F57,X
+.C:0db8   85 40      STA $40
+.C:0dba   A5 41      LDA $41
+.C:0dbc   AA         TAX
+.C:0dbd   18         CLC
+.C:0dbe   7D 57 0F   ADC $0F57,X
+.C:0dc1   85 41      STA $41
+.C:0dc3   4C 85 0D   JMP $0D85
+.C:0dc6   A6 70      LDX $70
+.C:0dc8   BD 80 AE   LDA $AE80,X
+.C:0dcb   9D 00 AE   STA $AE00,X
+.C:0dce   C6 70      DEC $70
+.C:0dd0   C6 44      DEC $44
+.C:0dd2   10 A5      BPL $0D79
+.C:0dd4   A9 0A      LDA #$0A
+.C:0dd6   85 44      STA $44
+.C:0dd8   C6 45      DEC $45
+.C:0dda   10 9D      BPL $0D79
+.C:0ddc   A9 78      LDA #$78
+.C:0dde   85 70      STA $70
+.C:0de0   A9 0A      LDA #$0A
+.C:0de2   85 44      STA $44
+.C:0de4   85 45      STA $45
+.C:0de6   A5 44      LDA $44
+.C:0de8   85 40      STA $40
+.C:0dea   A5 45      LDA $45
+.C:0dec   85 41      STA $41
+.C:0dee   A5 70      LDA $70
+.C:0df0   85 71      STA $71
+.C:0df2   AA         TAX
+.C:0df3   BD 00 AE   LDA $AE00,X
+.C:0df6   C9 7E      CMP #$7E
+.C:0df8   D0 61      BNE $0E5B
+.C:0dfa   A6 40      LDX $40
+.C:0dfc   A4 41      LDY $41
+.C:0dfe   BD 6D 0F   LDA $0F6D,X
+.C:0e01   D9 6D 0F   CMP $0F6D,Y
+.C:0e04   F0 04      BEQ $0E0A
+.C:0e06   90 21      BCC $0E29
+.C:0e08   B0 13      BCS $0E1D
+.C:0e0a   A5 71      LDA $71
+.C:0e0c   18         CLC
+.C:0e0d   7D 57 0F   ADC $0F57,X
+.C:0e10   18         CLC
+.C:0e11   79 62 0F   ADC $0F62,Y
+.C:0e14   20 78 0F   JSR $0F78
+.C:0e17   20 84 0F   JSR $0F84
+.C:0e1a   4C 32 0E   JMP $0E32
+.C:0e1d   A5 71      LDA $71
+.C:0e1f   18         CLC
+.C:0e20   7D 57 0F   ADC $0F57,X
+.C:0e23   20 78 0F   JSR $0F78
+.C:0e26   4C 32 0E   JMP $0E32
+.C:0e29   A5 71      LDA $71
+.C:0e2b   18         CLC
+.C:0e2c   79 62 0F   ADC $0F62,Y
+.C:0e2f   20 84 0F   JSR $0F84
+.C:0e32   C9 3C      CMP #$3C
+.C:0e34   F0 1D      BEQ $0E53
+.C:0e36   85 71      STA $71
+.C:0e38   AA         TAX
+.C:0e39   BD 80 AE   LDA $AE80,X
+.C:0e3c   C9 06      CMP #$06
+.C:0e3e   F0 1B      BEQ $0E5B
+.C:0e40   C9 08      CMP #$08
+.C:0e42   F0 17      BEQ $0E5B
+.C:0e44   C9 49      CMP #$49
+.C:0e46   F0 13      BEQ $0E5B
+.C:0e48   C9 7E      CMP #$7E
+.C:0e4a   F0 0F      BEQ $0E5B
+.C:0e4c   C9 7F      CMP #$7F
+.C:0e4e   F0 0B      BEQ $0E5B
+.C:0e50   4C FA 0D   JMP $0DFA
+.C:0e53   A6 70      LDX $70
+.C:0e55   BD 80 AE   LDA $AE80,X
+.C:0e58   9D 00 AE   STA $AE00,X
+.C:0e5b   C6 70      DEC $70
 
 ;; Copy tile bits to screen. Uses and restores zero-page pointers at 
-;;    $58, $59   ; ???
+;;    $58, $59   ; Pointer to screen color map ($0429)
 ;;    $7c, $7d   ; Pointer to screen bitmap 
 ;;    $7e, $7f   ; Pointer to tile bitmaps
 
@@ -172,31 +390,6 @@
 
 
 
-;; JSR $0b15
-.C:0b15   A5 1E      LDA $1E
-.C:0b17   C9 18      CMP #$18
-.C:0b19   D0 24      BNE $0B3F
-.C:0b1b   A5 74      LDA $74
-.C:0b1d   F0 20      BEQ $0B3F
-.C:0b1f   CE 40 0B   DEC $0B40
-.C:0b22   AD 40 0B   LDA $0B40
-.C:0b25   29 03      AND #$03
-.C:0b27   D0 16      BNE $0B3F
-.C:0b29   A6 75      LDX $75
-.C:0b2b   D0 03      BNE $0B30
-.C:0b2d   4C 99 08   JMP $0899
-.C:0b30   CA         DEX
-.C:0b31   D0 03      BNE $0B36
-.C:0b33   4C E0 08   JMP $08E0
-.C:0b36   CA         DEX
-.C:0b37   D0 03      BNE $0B3C
-.C:0b39   4C BD 08   JMP $08BD
-.C:0b3c   4C 04 09   JMP $0904
-.C:0b3f   60         RTS
-   0b40   XX                    ; data
-
-C:0ae1   20 15 0B   JSR $0B15
-C:0ae4   20 72 0C   JSR $0C72
 
 ;; Zero page
 $10
@@ -215,3 +408,4 @@ $74
 $75  
 $7C,$7D ; blt dst
 $7E,$7F ; blt src
+
