@@ -51,8 +51,8 @@
 .C:0ccc   C9 0B      CMP #$0B
 .C:0cce   D0 BE      BNE $0C8E
 .C:0cd0   A2 1F      LDX #$1F
-.C:0cd2   BD 00 AC   LDA $AC00,X
-.C:0cd5   F0 2D      BEQ $0D04
+.C:0cd2   BD 00 AC   LDA $AC00,X   ; <- branch from $0d0f
+.C:0cd5   F0 2D      BEQ $0D04     ; continue if zero
 .C:0cd7   BD 20 AC   LDA $AC20,X
 .C:0cda   18         CLC
 .C:0cdb   69 05      ADC #$05
@@ -76,8 +76,8 @@
 .C:0cfd   A8         TAY
 .C:0cfe   BD 00 AC   LDA $AC00,X
 .C:0d01   99 80 AE   STA $AE80,Y
-.C:0d04   CA         DEX
-.C:0d05   10 CB      BPL $0CD2
+.C:0d04   CA         DEX           ;  
+.C:0d05   10 CB      BPL $0CD2     ; --^ 
 .C:0d07   A5 6D      LDA $6D
 .C:0d09   F0 2A      BEQ $0D35
 .C:0d0b   A5 6E      LDA $6E
@@ -300,17 +300,17 @@
 .C:0eba   A8         TAY
 .C:0ebb   68         PLA
 .C:0ebc   AA         TAX
-.C:0ebd   BD B0 E1   LDA $E1B0,X
-.C:0ec0   91 58      STA ($58),Y
+.C:0ebd   BD B0 E1   LDA $E1B0,X    ; load tile color to A
+.C:0ec0   91 58      STA ($58),Y    ; store color for tile top two char-cells
 .C:0ec2   C8         INY
 .C:0ec3   91 58      STA ($58),Y
 .C:0ec5   48         PHA
 .C:0ec6   98         TYA
 .C:0ec7   18         CLC
-.C:0ec8   69 27      ADC #$27
+.C:0ec8   69 27      ADC #$27       ; advance to next char row +39
 .C:0eca   A8         TAY
 .C:0ecb   68         PLA
-.C:0ecc   91 58      STA ($58),Y
+.C:0ecc   91 58      STA ($58),Y    ; store color for tile bottom two char-cells
 .C:0ece   C8         INY
 .C:0ecf   91 58      STA ($58),Y
 .C:0ed1   A0 0F      LDY #$0F

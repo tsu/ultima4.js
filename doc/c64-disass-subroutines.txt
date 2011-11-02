@@ -91,6 +91,26 @@
 .C:1029   60         RTS        ; return
 
 
+--- 148B
+--- Y: input param
+.C:148b   84 7E      STY $7E
+.C:148d   A9 00      LDA #$00
+.C:148f   85 7F      STA $7F
+.C:1491   06 7E      ASL $7E
+.C:1493   26 7F      ROL $7F
+.C:1495   06 7E      ASL $7E
+.C:1497   26 7F      ROL $7F
+.C:1499   06 7E      ASL $7E
+.C:149b   26 7F      ROL $7F
+.C:149d   06 7E      ASL $7E
+.C:149f   26 7F      ROL $7F
+.C:14a1   A5 7F      LDA $7F
+.C:14a3   18         CLC
+.C:14a4   69 B0      ADC #$B0
+.C:14a6   85 7F      STA $7F
+.C:14a8   60         RTS        ; return
+
+
 --- ECC4
 .C:ecc4   A2 0B      LDX #$0B
 .C:ecc6   B5 30      LDA $30,X
