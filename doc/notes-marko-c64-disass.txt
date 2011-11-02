@@ -1,3 +1,18 @@
+;; code block which seems to access disk
+.C:a601   A9 01      LDA #$01    ; file name length
+.C:a603   A2 24      LDX #$24    ; ptr to name: at a624 is 23 (#)
+.C:a605   A0 A6      LDY #$A6
+.C:a607   20 BD FF   JSR $FFBD   ; SETNAM
+.C:a60a   A5 5F      LDA $5F
+.C:a60c   18         CLC
+.C:a60d   69 07      ADC #$07
+.C:a60f   AA         TAX
+.C:a610   A9 02      LDA #$02
+.C:a612   A8         TAY
+.C:a613   20 BA FF   JSR $FFBA
+.C:a616   20 C0 FF   JSR $FFC0
+
+
 ;; Memory snapshots while game in world map -mode
 
 
