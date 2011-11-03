@@ -21,6 +21,24 @@
 .C:a553   60         RTS
 
 
+--- A56D Setup something for block read?
+.C:a56d   A2 0F      LDX #$0F     ; open channel 15 for output
+.C:a56f   20 C9 FF   JSR $FFC9    ; CHKOUT 
+.C:a572   A0 00      LDY #$00
+.C:a574   B9 B4 A5   LDA $A5B4,Y
+.C:a577   F0 09      BEQ $A582
+.C:a579   29 7F      AND #$7F
+.C:a57b   20 D2 FF   JSR $FFD2    ; CHROUT
+.C:a57e   C8         INY
+.C:a57f   4C 74 A5   JMP $A574
+.C:a582   AD 13 A5   LDA $A513
+.C:a585   20 95 A5   JSR $A595
+.C:a588   AD 12 A5   LDA $A512
+.C:a58b   20 95 A5   JSR $A595
+.C:a58e   20 CC FF   JSR $FFCC    ; CLRCHN
+.C:a591   20 27 A6   JSR $A627
+.C:a594   60         RTS
+
 
 ;; potential prelude to the disk accessing code below
 .C:a5e3   A9 00      LDA #$00   ; file name length, no name

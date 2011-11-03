@@ -173,6 +173,63 @@
 .C:a125   60         RTS
 
 
+--- A45E (JMP dest from $a103)
+.C:a45e   BA         TSX
+.C:a45f   8E 08 A5   STX $A508
+.C:a462   20 8F A6   JSR $A68F
+.C:a465   A9 00      LDA #$00    ; Turn off kernal messages
+.C:a467   20 90 FF   JSR $FF90   ; SETMSG
+.C:a46a   20 E3 A5   JSR $A5E3
+.C:a46d   AD 00 A0   LDA $A000
+.C:a470   8D 14 A5   STA $A514
+.C:a473   AD 01 A0   LDA $A001
+.C:a476   8D 0F A5   STA $A50F
+.C:a479   AD 02 A0   LDA $A002
+.C:a47c   85 0E      STA $0E
+.C:a47e   AD 03 A0   LDA $A003
+.C:a481   85 0F      STA $0F
+.C:a483   AD 04 A0   LDA $A004
+.C:a486   8D 10 A5   STA $A510
+.C:a489   AD 05 A0   LDA $A005
+.C:a48c   8D 11 A5   STA $A511
+.C:a48f   A2 01      LDX #$01
+.C:a491   AD 10 A5   LDA $A510
+.C:a494   38         SEC
+.C:a495   FD E4 A4   SBC $A4E4,X
+.C:a498   8D 10 A5   STA $A510
+.C:a49b   AD 11 A5   LDA $A511
+.C:a49e   E9 00      SBC #$00
+.C:a4a0   8D 11 A5   STA $A511
+.C:a4a3   30 04      BMI $A4A9
+.C:a4a5   E8         INX
+.C:a4a6   4C 91 A4   JMP $A491
+.C:a4a9   AD 10 A5   LDA $A510
+.C:a4ac   18         CLC
+.C:a4ad   7D E4 A4   ADC $A4E4,X
+.C:a4b0   8D 12 A5   STA $A512
+.C:a4b3   8E 13 A5   STX $A513
+.C:a4b6   20 2F A5   JSR $A52F   ; read block from disk into ($0e)
+.C:a4b9   E6 0F      INC $0F
+.C:a4bb   EE 12 A5   INC $A512
+.C:a4be   AE 13 A5   LDX $A513
+.C:a4c1   AD 12 A5   LDA $A512
+.C:a4c4   DD E4 A4   CMP $A4E4,X
+.C:a4c7   D0 09      BNE $A4D2
+.C:a4c9   E8         INX
+.C:a4ca   8E 13 A5   STX $A513
+.C:a4cd   A9 00      LDA #$00
+.C:a4cf   8D 12 A5   STA $A512
+.C:a4d2   CE 0F A5   DEC $A50F
+.C:a4d5   D0 DF      BNE $A4B6
+.C:a4d7   20 69 A6   JSR $A669
+.C:a4da   20 74 A6   JSR $A674
+.C:a4dd   A9 00      LDA #$00
+.C:a4df   8D 20 D0   STA $D020
+.C:a4e2   18         CLC
+.C:a4e3   60         RTS
+
+
+
 --- EC89 Seems important, handels timer
 .C:ec89   48         PHA
 .C:ec8a   8A         TXA
