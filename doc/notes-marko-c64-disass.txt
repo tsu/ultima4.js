@@ -1,4 +1,9 @@
 ;; code block which seems to access disk
+;;    DOS block access needs two channels, one for command, and other
+;;    for data
+;; 
+;;    "The data channel for random access files is OPENed by selecting
+;;     the pound sign (#) as the file name."
 .C:a601   A9 01      LDA #$01    ; file name length
 .C:a603   A2 24      LDX #$24    ; ptr to name: at a624 is 23 (#)
 .C:a605   A0 A6      LDY #$A6
@@ -415,6 +420,7 @@ $14
 $15
 $1E
 $58,$59 ; 
+$5F   ; disk drive to access: 1=drive 8, 2=drive9
 $60
 $61
 $62

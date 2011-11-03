@@ -191,7 +191,7 @@
 .C:eca3   20 66 EE   JSR $EE66
 .C:eca6   20 C4 EC   JSR $ECC4
 .C:eca9   AD 81 EC   LDA $EC81
-.C:ecac   8D 04 DC   STA $DC04
+.C:ecac   8D 04 DC   STA $DC04    ; set timer A start value
 .C:ecaf   AD 82 EC   LDA $EC82
 .C:ecb2   8D 05 DC   STA $DC05
 .C:ecb5   A9 08      LDA #$08
@@ -203,6 +203,8 @@
 .C:ecbe   68         PLA
 .C:ecbf   6C C2 EC   JMP ($ECC2)
 .C:ecc2   AC A6 A2   LDY $A2A6
+
+--> ecc4 ?
 .C:ecc5   0B B5      ANC #$B5
 .C:ecc7   30 48      BMI $ED11
 .C:ecc9   BD D6 EC   LDA $ECD6,X
