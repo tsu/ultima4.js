@@ -1,9 +1,50 @@
+;; code which seems to read block from disk. Triggered from example
+;; on world map scrolling
+--- A52F Read block from disk
+.C:a52f   AD 14 A5   LDA $A514
+.C:a532   48         PHA
+.C:a533   18         CLC
+.C:a534   69 B0      ADC #$B0
+.C:a536   8D B5 A5   STA $A5B5
+.C:a539   68         PLA
+.C:a53a   C9 02      CMP #$02
+.C:a53c   F0 16      BEQ $A554
+.C:a53e   20 6D A5   JSR $A56D
+.C:a541   A2 02      LDX #$02     ; Set channel 2, data
+.C:a543   20 C6 FF   JSR $FFC6    ; CHKIN
+.C:a546   A0 00      LDY #$00     ; set counter
+.C:a548   20 CF FF   JSR $FFCF    ; CHRIN - read byte
+.C:a54b   91 0E      STA ($0E),Y  ; store via pointer at $0E (eg. $e900)
+.C:a54d   C8         INY          ; increment counter
+.C:a54e   D0 F8      BNE $A548    ; read 256 bytes
+.C:a550   20 CC FF   JSR $FFCC    ; CLRCHN
+.C:a553   60         RTS
+
+
+
+;; potential prelude to the disk accessing code below
+.C:a5e3   A9 00      LDA #$00   ; file name length, no name
+.C:a5e5   20 BD FF   JSR $FFBD  ; SETNAM
+.C:a5e8   A5 5F      LDA $5F    ; Disk number 1 or 2
+.C:a5ea   18         CLC
+.C:a5eb   69 07      ADC #$07   ; disk number to 8 or 9
+.C:a5ed   AA         TAX
+.C:a5ee   A9 0F      LDA #$0F   ; Channel 15, command?
+.C:a5f0   A8         TAY
+.C:a5f1   20 BA FF   JSR $FFBA  ; SETLFS
+.C:a5f4   20 C0 FF   JSR $FFC0  ; OPEN
+.C:a5f7   20 B7 FF   JSR $FFB7  ; READST
+.C:a5fa   8D 25 A6   STA $A625  ;
+.C:a5fd   29 80      AND #$80
+.C:a5ff   D0 5C      BNE $A65D
+
 ;; code block which seems to access disk
 ;;    DOS block access needs two channels, one for command, and other
 ;;    for data
 ;; 
 ;;    "The data channel for random access files is OPENed by selecting
 ;;     the pound sign (#) as the file name."
+--- A601
 .C:a601   A9 01      LDA #$01    ; file name length
 .C:a603   A2 24      LDX #$24    ; ptr to name: at a624 is 23 (#)
 .C:a605   A0 A6      LDY #$A6
@@ -12,14 +53,59 @@
 .C:a60c   18         CLC
 .C:a60d   69 07      ADC #$07
 .C:a60f   AA         TAX
-.C:a610   A9 02      LDA #$02
+.C:a610   A9 02      LDA #$02    ; channel 2, data?
 .C:a612   A8         TAY
-.C:a613   20 BA FF   JSR $FFBA
-.C:a616   20 C0 FF   JSR $FFC0
+.C:a613   20 BA FF   JSR $FFBA   ; SETLFS
+.C:a616   20 C0 FF   JSR $FFC0   ; OPEN
+.C:a619   20 B7 FF   JSR $FFB7   ; READST
+.C:a61c   8D 25 A6   STA $A625   ; local static var?
+.C:a61f   29 80      AND #$80    ; Device present?
+.C:a621   D0 3A      BNE $A65D   ;    no - branch
+.C:a623   60         RTS         ;    yes - return
+.C:a624   23 30      RLA ($30,X) ; <- local static data?
+
+
+---  A65D
+.C:a65d   20 69 A6   JSR $A669
+.C:a660   20 74 A6   JSR $A674
+.C:a663   AE 08 A5   LDX $A508
+.C:a666   9A         TXS
+.C:a667   38         SEC
+.C:a668   60         RTS
+
+
+;; Close disk?
+--- A669
+.C:a669   A9 02      LDA #$02   ; data channel?
+.C:a66b   20 C3 FF   JSR $FFC3  ; CLOSE
+.C:a66e   A9 0F      LDA #$0F   ; command channel;
+.C:a670   20 C3 FF   JSR $FFC3  ; CLOSE
+.C:a673   60         RTS
+
+
+;; Set interrupt pointers
+--- A674
+.C:a674   78         SEI
+.C:a675   A9 96      LDA #$96
+.C:a677   8D FE FF   STA $FFFE 
+.C:a67a   A9 A6      LDA #$A6
+.C:a67c   8D FF FF   STA $FFFF  ; Set IRQ pointer to $A696
+.C:a67f   A9 BB      LDA #$BB
+.C:a681   8D FA FF   STA $FFFA
+.C:a684   A9 A6      LDA #$A6
+.C:a686   8D FB FF   STA $FFFB  ; Set NMI pointer to $A6BB
+.C:a689   A9 35      LDA #$35   ; Set memory bank setup to
+.C:a68b   85 01      STA $01    ;   RAM visible at $A000 and $E000
+.C:a68d   58         CLI
+.C:a68e   60         RTS
+
+--- A696 IRQ handler
+.C:a696   2C 69 FF   BIT $FF69
+.C:a699   85 7B      STA $7B
+.C:a69b   60         RTS
 
 
 ;; Memory snapshots while game in world map -mode
-
 
 .C:0c72   20 90 0F   JSR $0F90    ; <-- 0ae4:  JSR $0C72
 .C:0c75   20 65 18   JSR $1865
@@ -412,6 +498,7 @@
 
 
 ;; Zero page
+$0e, 0f  ; store pointer when reading block from disk
 $10
 $11
 $12
