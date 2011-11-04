@@ -206,8 +206,8 @@
 .C:a4a9   AD 10 A5   LDA $A510
 .C:a4ac   18         CLC
 .C:a4ad   7D E4 A4   ADC $A4E4,X
-.C:a4b0   8D 12 A5   STA $A512
-.C:a4b3   8E 13 A5   STX $A513
+.C:a4b0   8D 12 A5   STA $A512   ; sector # ?
+.C:a4b3   8E 13 A5   STX $A513   ; track # ?
 .C:a4b6   20 2F A5   JSR $A52F   ; read block from disk into ($0e)
 .C:a4b9   E6 0F      INC $0F
 .C:a4bb   EE 12 A5   INC $A512
