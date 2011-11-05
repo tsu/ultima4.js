@@ -1,6 +1,7 @@
+#!/usr/local/bin/sbcl --script
 ;;;; Disassbmbler for 6502 binary files
 ;; Reads from stdout, or can be give a file from cmd line. 
-;; Example: sbcl --script disass-6502.lisp foo.dat
+;; Example: sbcl --script disass-6502.lisp foo.dat <offset> <length>
 
 
 ;;; Definitions
@@ -64,11 +65,12 @@
     (#xF8 (SED Implied))     (#xF9 (SBC AbsoluteY)) (#xFD (SBC AbsoluteX))
     (#xFE (INC AbsoluteX))))
 
+;; Create and populate hash table with binary byte as key
 (defvar *opcodes-ht* (make-hash-table))
 (mapc #'(lambda (x) (setf (gethash (car x) *opcodes-ht*) (cadr x))) *opcodes*)
 
 (defun byte-opcode (byte)
-  "Give opcode for byte. Returns list."
+  "Give opcode for byte. Returns list: #xF9 -> (SBC AbsoluteY)"
   (let ((op (gethash byte *opcodes-ht*)))
     (if op
 	op
@@ -81,21 +83,27 @@
     ((Immediate ZeroPage ZeroPageX IndirectX IndirectY Relative) 1)
     ((Absolute AbsoluteX AbsoluteY Indirect) 2)))
 
-(defun addr-data-string (mode data)
+(defun two-complement-int (n)
+  "Convert two's complement byte to signed integer"
+  (if (logbitp 7 n)
+      (- (1+ (logxor 255 n)))
+      n))
+
+(defun addr-data-string (mode data pc)
   "Addressing mode (with data) as string"
   (case mode
     ((Implied Unknown Accumulator) "")
     (Immediate (format nil "#$~2,'0x" (car data)))
-    (Zeropage (format nil "$~2,'0x" (car data)))
+    (Zeropage  (format nil "$~2,'0x" (car data)))
     (ZeropageX (format nil "$~2,'0x,X" (car data)))
     (ZeropageY (format nil "$~2,'0x,Y" (car data)))
     (IndirectX (format nil "($~2,'0x,X)" (car data)))
     (IndirectY (format nil "($~2,'0x),Y" (car data)))
-    (Relative (format nil "rel #$~2,'0x" (car data)))
-    (Absolute (format nil "$~2,'0x~2,'0x" (cadr data) (car data)))
+    (Relative  (format nil "rel $~4,'0x" (+ pc (two-complement-int (car data)))))
+    (Absolute  (format nil "$~2,'0x~2,'0x" (cadr data) (car data)))
     (AbsoluteX (format nil "$~2,'0x~2,'0x,X" (cadr data) (car data)))
     (AbsoluteY (format nil "$~2,'0x~2,'0x,Y" (cadr data) (car data)))
-    (Indirect (format nil "($~2,'0x~2,'0x)" (cadr data) (car data)))))
+    (Indirect  (format nil "($~2,'0x~2,'0x)" (cadr data) (car data)))))
 
 (defun read-next-opcode (stream)
   "Reads next 6502 opcode with data from stream. Returns list."
@@ -105,31 +113,46 @@
 	      (data))
 	  (list b 
 		op
-		(dotimes (i (addressing-mode-length (cadr op)) data)
+		(dotimes (i (addressing-mode-length (cadr op)) (nreverse data))
 		  (push (read-byte stream nil) data)))))))
 
 
-(defun disass (input output &key (size nil) (stop-on-rts t))
+(defun disass (input output &key (size nil) (stop-on-rts t) (pc 0))
   "Read 6502 binary code from output and write disassembled opcoded to output"
-  (do* ((prev nil (car op))
-	(pc 0 (incf pc))
+  (do* ((prev nil op)
 	(op (read-next-opcode input) (read-next-opcode input))
-	(n 0 (incf n)))
+	(n 0 (incf n (1+ (length (caddr op))))))
       ((or (null op)
 	   (and size (> n size))
-	   (and stop-on-rts prev (= prev #x60)))
+	   (and stop-on-rts prev (= (car prev) #x60)))
        t)
     (format output ".~4,'0x" pc)
     (format output "   ~2,'0x" (car op))
     (format output " ~{~2,'0x ~}" (caddr op))
     (format output " ~19T~A" (caadr op))
-    (format output " ~A" (addr-data-string (cadadr op) (caddr op)))
-    (format output "~%")))
+    (format output " ~A" (addr-data-string (cadadr op) (caddr op) pc))
+    (format output "~%")
+    (incf pc (1+ (length (caddr op))))))
 
+
+(defun parse-hex-dec-int (s)
+  "Parse string as integer. Strings starting with $ denotes hex-nmbers"
+  (if (char= (char s 0) #\$)
+      (parse-integer (subseq s 1) :radix 16)
+      (parse-integer s)))
 
 ;;; Startup from command line
-(if (> (length sb-ext:*posix-argv*) 1)
-    (with-open-file (in (cadr sb-ext:*posix-argv*) :element-type '(unsigned-byte 8))
-      (disass in *standard-output* ))
-    (disass *standard-input* *standard-output*))
+(let ((argv sb-ext:*posix-argv*))
+  (if (> (length argv) 1)
+      (let ((filename (nth 1 argv))
+	    (offset (if (> (length argv) 2) 
+			(parse-hex-dec-int (nth 2 argv))
+			0))
+	    (size (if (> (length argv) 3)
+		      (parse-hex-dec-int (nth 3 argv)))))
+	(with-open-file (in filename  :element-type '(unsigned-byte 8))
+	  (when offset
+	    (file-position in offset))
+	  (disass in *standard-output* :size size :pc offset)))
+      (disass *standard-input* *standard-output*)))
 
