@@ -135,14 +135,13 @@
 	   (and size (> n size))
 	   (and stop-on-rts prev (= (car prev) #x60)))
        t)
-    (format output ".~4,'0x" pc)
+    (format output ".~4,'0x   ~2,'0x ~{~2,'0x ~} ~19T~A" 
+	    pc            ; address
+	    (car ins)     ; byte - opcode
+	    (caddr ins)   ; bytes - data
+	    (caadr ins))  ; opcode/mmemonic
     (incf pc (instruction-length ins))
-    (format output "   ~2,'0x" (car ins))
-    (format output " ~{~2,'0x ~}" (caddr ins))
-    (format output " ~19T~A" (caadr ins))
-    (format output " ~A" (addr-data-string (cadadr ins) (caddr ins) pc))
-    (format output "~%")))
-
+    (format output " ~A~%" (addr-data-string (cadadr ins) (caddr ins) pc))))
 
 
 (defun parse-hex-dec-int (s)
