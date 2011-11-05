@@ -117,17 +117,17 @@
 (defun read-next-instruction (stream)
   "Reads next 6502 instruction (opcode and data) from stream. Returns list."
   (let ((b (read-byte stream nil)))
-    (if b
-	(let ((op (byte-opcode b)))
-	  (list b op
-		(read-instruction-data stream op))))))
+    (when b
+      (let ((op (byte-opcode b)))
+	(list b op
+	      (read-instruction-data stream op))))))
 
 (defun instruction-length (ins)
   "Length of instruction (opcode + data) in bytes"
   (1+ (length (caddr ins))))
 
 (defun disass (input output &key (size nil) (stop-on-rts t) (pc 0))
-  "Read 6502 binary code from output and write disassembled opcoded to output"
+  "Read 6502 binary code from input and write disassembled opcoded to output"
   (do* ((prev nil ins)
 	(ins (read-next-instruction input) (read-next-instruction input))
 	(n 0 (incf n (instruction-length ins))))
@@ -144,7 +144,7 @@
 
 
 (defun parse-hex-dec-int (s)
-  "Parse string as integer. Strings starting with $ denotes hex-nmbers"
+  "Parse string as integer. String starting with $ denotes a hex-number"
   (if (char= (char s 0) #\$)
       (parse-integer (subseq s 1) :radix 16)
       (parse-integer s)))
