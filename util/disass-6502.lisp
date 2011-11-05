@@ -1,7 +1,9 @@
 #!/usr/local/bin/sbcl --script
 ;;;; Disassbmbler for 6502 binary files
 ;; Reads from stdout, or can be give a file from cmd line. 
-;; Example: sbcl --script disass-6502.lisp foo.dat <offset> <length>
+;; Examples: 
+;;     disass-6502.lisp ../data/c64-memdump-u4-worldmap.dat \$0f90
+;;     sbcl --script disass-6502.lisp foo.dat <offset> <length>
 
 
 ;;; Definitions
