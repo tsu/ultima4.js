@@ -1,16 +1,21 @@
 #!/bin/sh
-#  Extracts bytes from stdin and write to stdout
+#  Extracts bytes from a file
 #  Example: 
-#       echo "This is a test" | ./extract-bytes 1 6
-#  Outputs
+#       echo "This is a test" > test.dat
+#       ./extract-bytes test.dat 1 6
+#  or
+#       echo "This is a test" | ./extract-bytes - 1 6
+#  Both output:
 #       his is
 
-if [ $# -ne 2 ]; then
-   echo "usage: extract-bytes <offset> <length>" 1>&2
+if [ $# -ne 3 ]; then
+   echo "usage: extract-bytes <file> <offset> <length>" 1>&2
+   echo "       <file>     file name or - for stdin"
    exit 1
 fi
 
-OFFSET=$1
-LENGTH=$2
+FILE=$1
+OFFSET=$2
+LENGTH=$3
 
-dd bs=1 count=$LENGTH iseek=$OFFSET 2>/dev/null
+cat $FILE | dd bs=1 count=$LENGTH iseek=$OFFSET 2>/dev/null
