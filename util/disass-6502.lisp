@@ -133,8 +133,7 @@
 	(n 0 (incf n (instruction-length ins))))
       ((or (null ins)
 	   (and size (> n size))
-	   (and stop-on-rts prev (= (car prev) #x60)))
-       t)
+	   (and stop-on-rts prev (= (car prev) #x60))))
     (format output ".~4,'0x   ~2,'0x ~{~2,'0x ~} ~19T~A" 
 	    pc            ; address
 	    (car ins)     ; byte - opcode
