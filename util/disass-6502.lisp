@@ -2,7 +2,7 @@
 ;;;; Disassbmbler for 6502 binary files
 ;; Reads from stdout, or can be give a file from cmd line. 
 ;; Examples: 
-;;     disass-6502.lisp ../data/c64-memdump-u4-worldmap.dat \$0f90
+;;     ./disass-6502.lisp ../data/c64-memdump-u4-worldmap.dat \$0f90
 ;;     sbcl --script disass-6502.lisp foo.dat <offset> <length>
 
 
@@ -107,16 +107,20 @@
     (AbsoluteY (format nil "$~2,'0x~2,'0x,Y" (cadr data) (car data)))
     (Indirect  (format nil "($~2,'0x~2,'0x)" (cadr data) (car data)))))
 
-(defun read-next-opcode (stream)
-  "Reads next 6502 opcode with data from stream. Returns list."
+(defun read-instruction-data (stream op)
+  "Read 0..2 bytes of data for opcode from stream."
+  (let ((res))
+    (dotimes (i (addressing-mode-length (cadr op)))
+      (push (read-byte stream nil) res))
+    (nreverse res)))
+
+(defun read-next-instruction (stream)
+  "Reads next 6502 instruction (opcode and data) from stream. Returns list."
   (let ((b (read-byte stream nil)))
     (if b
-	(let ((op (byte-opcode b))
-	      (data))
-	  (list b 
-		op
-		(dotimes (i (addressing-mode-length (cadr op)) (nreverse data))
-		  (push (read-byte stream nil) data)))))))
+	(let ((op (byte-opcode b)))
+	  (list b op
+		(read-instruction-data stream op))))))
 
 (defun instruction-length (ins)
   "Length of instruction (opcode + data) in bytes"
@@ -124,19 +128,19 @@
 
 (defun disass (input output &key (size nil) (stop-on-rts t) (pc 0))
   "Read 6502 binary code from output and write disassembled opcoded to output"
-  (do* ((prev nil op)
-	(op (read-next-opcode input) (read-next-opcode input))
-	(n 0 (incf n (1+ (length (caddr op))))))
-      ((or (null op)
+  (do* ((prev nil ins)
+	(ins (read-next-instruction input) (read-next-instruction input))
+	(n 0 (incf n (instruction-length ins))))
+      ((or (null ins)
 	   (and size (> n size))
 	   (and stop-on-rts prev (= (car prev) #x60)))
        t)
     (format output ".~4,'0x" pc)
-    (incf pc (instruction-length op))
-    (format output "   ~2,'0x" (car op))
-    (format output " ~{~2,'0x ~}" (caddr op))
-    (format output " ~19T~A" (caadr op))
-    (format output " ~A" (addr-data-string (cadadr op) (caddr op) pc))
+    (incf pc (instruction-length ins))
+    (format output "   ~2,'0x" (car ins))
+    (format output " ~{~2,'0x ~}" (caddr ins))
+    (format output " ~19T~A" (caadr ins))
+    (format output " ~A" (addr-data-string (cadadr ins) (caddr ins) pc))
     (format output "~%")))
 
 
