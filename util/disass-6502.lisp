@@ -99,7 +99,7 @@
     (ZeropageY (format nil "$~2,'0x,Y" (car data)))
     (IndirectX (format nil "($~2,'0x,X)" (car data)))
     (IndirectY (format nil "($~2,'0x),Y" (car data)))
-    (Relative  (format nil "rel $~4,'0x" (+ pc (two-complement-int (car data)))))
+    (Relative  (format nil "$~4,'0x" (+ pc (two-complement-int (car data)))))
     (Absolute  (format nil "$~2,'0x~2,'0x" (cadr data) (car data)))
     (AbsoluteX (format nil "$~2,'0x~2,'0x,X" (cadr data) (car data)))
     (AbsoluteY (format nil "$~2,'0x~2,'0x,Y" (cadr data) (car data)))
@@ -116,6 +116,9 @@
 		(dotimes (i (addressing-mode-length (cadr op)) (nreverse data))
 		  (push (read-byte stream nil) data)))))))
 
+(defun instruction-length (ins)
+  "Length of instruction (opcode + data) in bytes"
+  (1+ (length (caddr ins))))
 
 (defun disass (input output &key (size nil) (stop-on-rts t) (pc 0))
   "Read 6502 binary code from output and write disassembled opcoded to output"
@@ -127,12 +130,13 @@
 	   (and stop-on-rts prev (= (car prev) #x60)))
        t)
     (format output ".~4,'0x" pc)
+    (incf pc (instruction-length op))
     (format output "   ~2,'0x" (car op))
     (format output " ~{~2,'0x ~}" (caddr op))
     (format output " ~19T~A" (caadr op))
     (format output " ~A" (addr-data-string (cadadr op) (caddr op) pc))
-    (format output "~%")
-    (incf pc (1+ (length (caddr op))))))
+    (format output "~%")))
+
 
 
 (defun parse-hex-dec-int (s)
