@@ -80,6 +80,7 @@
     (Immediate (format nil "#$~2,'0x" (car data)))
     (Zeropage (format nil "$~2,'0x" (car data)))
     (ZeropageX (format nil "$~2,'0x,X" (car data)))
+    (ZeropageY (format nil "$~2,'0x,Y" (car data)))
     (IndirectX (format nil "($~2,'0x,X)" (car data)))
     (IndirectY (format nil "($~2,'0x),Y" (car data)))
     (Relative (format nil "rel #$~2,'0x" (car data)))
