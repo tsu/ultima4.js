@@ -16,6 +16,11 @@ var _6510 = (function() {
     dbgSetX: function(v) { X = v; },
     dbgGetA: function() { return A; },
     dbgGetY: function() { return Y; },
-    dbgGetX: function() { return X; }
+    dbgGetX: function() { return X; },
+    dbgReset: function() {
+      _6510.dbgSetA(0x00);
+      _6510.dbgSetY(0x00);
+      _6510.dbgSetX(0x00);
+    }
   };
 })();

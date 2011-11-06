@@ -11,13 +11,18 @@ describe("6510 debug functionality", function() {
     _6510.dbgSetX(0xfa);
     expect(_6510.dbgGetX()).toEqual(0xfa);
   });
+  it("should reset the 6510", function() {
+    _6510.dbgSetA(0xf3);
+    _6510.dbgSetY(0xa4);
+    _6510.dbgSetX(0x87);
+    _6510.dbgReset();
+    expect(_6510.dbgGetA()).toEqual(0x00);
+    expect(_6510.dbgGetY()).toEqual(0x00);
+    expect(_6510.dbgGetX()).toEqual(0x00);
+  });
 });
 describe("in the 6510 instruction set", function() {
-  beforeEach(function() {
-    _6510.dbgSetA(0x00);
-    _6510.dbgSetX(0x00);
-    _6510.dbgSetY(0x00);
-  });
+  beforeEach(_6510.dbgReset);
   describe("ADC", function() {
     it("should add memory to accumulator with carry", function() {
     });
