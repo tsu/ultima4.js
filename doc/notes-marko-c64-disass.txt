@@ -77,7 +77,7 @@
 .C:a5a1   D0 02      BNE $A5A5  ; branch if 1st digit non-zero
 .C:a5a3   A9 10      LDA #$10   ; space ($10 xor $30 = $20)
 .C:a5a5   20 AE A5   JSR $A5AE  ; write 1st digit or space
-.C:a5a8   68         PLA        ; pop number of 10s 
+.C:a5a8   68         PLA        ; pop 2nd digit 
 .C:a5a9   20 AE A5   JSR $A5AE  ; write 2nd digit
 .C:a5ac   A9 10      LDA #$10   ; setup to output space char
 .C:a5ae   49 30      EOR #$30
