@@ -11,14 +11,20 @@ describe("6510 debug functionality", function() {
     _6510.dbgSetX(0xfa);
     expect(_6510.dbgGetX()).toEqual(0xfa);
   });
+  it("should get and set the stack pointer", function() {
+    _6510.dbgSetS(0xff);
+    expect(_6510.dbgGetS()).toEqual(0xfF);
+  });
   it("should reset the 6510", function() {
     _6510.dbgSetA(0xf3);
     _6510.dbgSetY(0xa4);
     _6510.dbgSetX(0x87);
+    _6510.dbgSetS(0x11);
     _6510.dbgReset();
     expect(_6510.dbgGetA()).toEqual(0x00);
     expect(_6510.dbgGetY()).toEqual(0x00);
     expect(_6510.dbgGetX()).toEqual(0x00);
+    expect(_6510.dbgGetS()).toEqual(0x00);
   });
 });
 describe("in the 6510 instruction set", function() {
@@ -252,6 +258,11 @@ describe("in the 6510 instruction set", function() {
   });
   describe("TXS", function() {
     it("should transfer index x to stack pointer", function() {
+      var v = 0x4d;
+      _6510.dbgSetX(v);
+      _6510.TXS();
+      expect(_6510.dbgGetS()).toEqual(v);
+      expect(_6510.dbgGetY()).toEqual(0x00);
     });
   });
   describe("TYA", function() {
