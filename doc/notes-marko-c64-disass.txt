@@ -8,8 +8,8 @@
 .C:a536   8D B5 A5   STA $A5B5
 .C:a539   68         PLA
 .C:a53a   C9 02      CMP #$02
-.C:a53c   F0 16      BEQ $A554    ; Branch to write, else read?
-.C:a53e   20 6D A5   JSR $A56D
+.C:a53c   F0 16      BEQ $A554    ; Write? Branch Label_write, or
+.C:a53e   20 6D A5   JSR $A56D    ;     continue read
 .C:a541   A2 02      LDX #$02     ; Set channel 2, data
 .C:a543   20 C6 FF   JSR $FFC6    ; CHKIN
 .C:a546   A0 00      LDY #$00     ; set counter
@@ -19,9 +19,7 @@
 .C:a54e   D0 F8      BNE $A548    ; read 256 bytes
 .C:a550   20 CC FF   JSR $FFCC    ; CLRCHN
 .C:a553   60         RTS
-
-
---- A554 Write block?
+:Label_write
 .C:a554   20 BD A5   JSR $A5BD
 .C:a557   A2 02      LDX #$02     ; Set channel 2, data
 .C:a559   20 C9 FF   JSR $FFC9    ; CHKOUT
@@ -35,21 +33,27 @@
 .C:a56c   60         RTS
 
 
---- A56D Setup something for block read?
+
 ;; writes cmd weirdly into channel
 ;; 
 ;; >C:a5b4  d5 b1 ba b2  a0 b0 a0 00
 ;;          U  1  :  2   Sp 0  Sp
 ;; >C:a512  0e 06
+;;
+;; From manual: 
+;;    PRINT#file#, "U1:" channel; drive; track; block
+;;    160 print#15,"u1:";2;0;18;0
+--- A56D Setup something for block read?
 .C:a56d   A2 0F      LDX #$0F     ; open channel 15 for output
 .C:a56f   20 C9 FF   JSR $FFC9    ; CHKOUT 
 .C:a572   A0 00      LDY #$00
 .C:a574   B9 B4 A5   LDA $A5B4,Y
-.C:a577   F0 09      BEQ $A582
-.C:a579   29 7F      AND #$7F     ; clear top bit
-.C:a57b   20 D2 FF   JSR $FFD2    ; CHROUT
+.C:a577   F0 09      BEQ $A582    ; -> Label_1
+.C:a579   29 7F      AND #$7F     ; clear 7th bit
+.C:a57b   20 D2 FF   JSR $FFD2    ; CHROUT - write cmd "U1:2 0 "
 .C:a57e   C8         INY
 .C:a57f   4C 74 A5   JMP $A574
+:Label_1
 .C:a582   AD 13 A5   LDA $A513    ; Load track # ?
 .C:a585   20 95 A5   JSR $A595
 .C:a588   AD 12 A5   LDA $A512    ; Load sector # ?
@@ -59,25 +63,57 @@
 .C:a594   60         RTS
 
 
---- A595 CHROUT data into channel?
+;; write A as string into file via CHROUT
+;; counts number of 10s into X
+--- A595 write accumalator as PETSCII string
 .C:a595   A2 FF      LDX #$FF
 .C:a597   38         SEC
-.C:a598   E8         INX
-.C:a599   E9 0A      SBC #$0A
-.C:a59b   B0 FB      BCS $A598
-.C:a59d   69 0A      ADC #$0A
-.C:a59f   48         PHA
-.C:a5a0   8A         TXA
-.C:a5a1   D0 02      BNE $A5A5
-.C:a5a3   A9 10      LDA #$10
-.C:a5a5   20 AE A5   JSR $A5AE
-.C:a5a8   68         PLA
-.C:a5a9   20 AE A5   JSR $A5AE
+.C:a598   E8         INX        ; counter, number of 10s
+.C:a599   E9 0A      SBC #$0A   ; subtract 10
+.C:a59b   B0 FB      BCS $A598  ; loop if still left
+.C:a59d   69 0A      ADC #$0A   ; add 10, fix last iteration
+.C:a59f   48         PHA        ; A has 2nd digit
+.C:a5a0   8A         TXA        ; X has 1st digit
+.C:a5a1   D0 02      BNE $A5A5  ; branch if 1st digit non-zero
+.C:a5a3   A9 10      LDA #$10   ; space ($10 xor $30 = $20)
+.C:a5a5   20 AE A5   JSR $A5AE  ; write 1st digit or space
+.C:a5a8   68         PLA        ; pop number of 10s 
+.C:a5a9   20 AE A5   JSR $A5AE  ; write 2nd digit
 .C:a5ac   A9 10      LDA #$10   ; setup to output space char
 .C:a5ae   49 30      EOR #$30
 .C:a5b0   20 D2 FF   JSR $FFD2  ; CHROUT
 .C:a5b3   60         RTS
 
+
+--- A627 Process some disk read related stuff
+.C:a627   A9 30      LDA #$30
+.C:a629   8D 25 A6   STA $A625
+.C:a62c   8D 26 A6   STA $A626
+.C:a62f   A2 0F      LDX #$0F
+.C:a631   20 C6 FF   JSR $FFC6  ; CHKIN
+.C:a634   20 CF FF   JSR $FFCF  ; CHRIN
+.C:a637   C9 0D      CMP #$0D
+.C:a639   F0 10      BEQ $A64B
+.C:a63b   8D 25 A6   STA $A625
+.C:a63e   20 CF FF   JSR $FFCF  ; CHRIN
+.C:a641   8D 26 A6   STA $A626  
+.C:a644   20 CF FF   JSR $FFCF  ; CHRIN
+.C:a647   C9 0D      CMP #$0D
+.C:a649   D0 F9      BNE $A644
+.C:a64b   20 CC FF   JSR $FFCC  ; CLRCHN
+.C:a64e   AD 25 A6   LDA $A625
+.C:a651   C9 30      CMP #$30
+.C:a653   D0 08      BNE $A65D
+.C:a655   AD 26 A6   LDA $A626
+.C:a658   C9 30      CMP #$30
+.C:a65a   D0 01      BNE $A65D
+.C:a65c   60         RTS
+.C:a65d   20 69 A6   JSR $A669
+.C:a660   20 74 A6   JSR $A674
+.C:a663   AE 08 A5   LDX $A508
+.C:a666   9A         TXS
+.C:a667   38         SEC
+.C:a668   60         RTS
 
 
 
