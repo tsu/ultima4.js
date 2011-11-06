@@ -8,32 +8,14 @@ var _6510 = (function() {
   function TAY() {
     Y = A;
   }
-  function dbgSetA(v) {
-    A = v;
-  }
-  function dbgSetX(v) {
-    X = v;
-  }
-  function dbgSetY(v) {
-    Y = v;
-  }
-  function dbgGetA() {
-    return A;
-  }
-  function dbgGetX() {
-    return X;
-  }
-  function dbgGetY() {
-    return Y;
-  }
   return {
     TAX: TAX,
     TAY: TAY,
-    dbgSetA: dbgSetA,
-    dbgGetA: dbgGetA,
-    dbgGetX: dbgGetX,
-    dbgSetX: dbgSetX,
-    dbgGetY: dbgGetY,
-    dbgSetY: dbgSetY
+    dbgSetA: function(v) { A = v; },
+    dbgSetY: function(v) { Y = v; },
+    dbgSetX: function(v) { X = v; },
+    dbgGetA: function() { return A; },
+    dbgGetY: function() { return Y; },
+    dbgGetX: function() { return X; }
   };
 })();
