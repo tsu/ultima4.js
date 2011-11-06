@@ -10,5 +10,5 @@ fi
 FILE=$1
 BLOCK=$2
 
-./extract-bytes $FILE $(($BLOCK*256)) 256 | xxd -g1 | cut -c10-56 | sed 's/01/. /g; s/04/__/g; s/05/ff/g; s/06/HH/g; s/07/MM/g'
+./extract-bytes $FILE $(($BLOCK*256)) 256 | xxd -g1 | cut -c10-56 | sed 's/00/  /g; s/01/. /g; s/02/../g; s/04/__/g; s/05/ff/g; s/06/HH/g; s/07/MM/g'
 
