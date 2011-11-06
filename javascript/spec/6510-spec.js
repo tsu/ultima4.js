@@ -231,7 +231,9 @@ describe("in the 6510 instruction set", function() {
       _6510.dbgSetA(v);
       _6510.TAX();
       expect(_6510.dbgGetX()).toEqual(v);
+      expect(_6510.dbgGetA()).toEqual(v);
       expect(_6510.dbgGetY()).toEqual(0x00);
+      expect(_6510.dbgGetS()).toEqual(0x00);
     });
   });
   describe("TAY", function() {
@@ -240,11 +242,20 @@ describe("in the 6510 instruction set", function() {
       _6510.dbgSetA(v);
       _6510.TAY();
       expect(_6510.dbgGetY()).toEqual(v);
+      expect(_6510.dbgGetA()).toEqual(v);
       expect(_6510.dbgGetX()).toEqual(0x00);
+      expect(_6510.dbgGetS()).toEqual(0x00);
     });
   });
   describe("TSX", function() {
     it("should transfer stack pointer to index x", function() {
+      var v = 0x4d;
+      _6510.dbgSetS(v);
+      _6510.TSX();
+      expect(_6510.dbgGetX()).toEqual(v);
+      expect(_6510.dbgGetS()).toEqual(v);
+      expect(_6510.dbgGetY()).toEqual(0x00);
+      expect(_6510.dbgGetA()).toEqual(0x00);
     });
   });
   describe("TXA", function() {
@@ -253,7 +264,9 @@ describe("in the 6510 instruction set", function() {
       _6510.dbgSetX(v);
       _6510.TXA();
       expect(_6510.dbgGetA()).toEqual(v);
+      expect(_6510.dbgGetX()).toEqual(v);
       expect(_6510.dbgGetY()).toEqual(0x00);
+      expect(_6510.dbgGetS()).toEqual(0x00);
     });
   });
   describe("TXS", function() {
@@ -262,7 +275,9 @@ describe("in the 6510 instruction set", function() {
       _6510.dbgSetX(v);
       _6510.TXS();
       expect(_6510.dbgGetS()).toEqual(v);
+      expect(_6510.dbgGetX()).toEqual(v);
       expect(_6510.dbgGetY()).toEqual(0x00);
+      expect(_6510.dbgGetA()).toEqual(0x00);
     });
   });
   describe("TYA", function() {
@@ -271,7 +286,9 @@ describe("in the 6510 instruction set", function() {
       _6510.dbgSetY(v);
       _6510.TYA();
       expect(_6510.dbgGetA()).toEqual(v);
+      expect(_6510.dbgGetY()).toEqual(v);
       expect(_6510.dbgGetX()).toEqual(0x00);
+      expect(_6510.dbgGetS()).toEqual(0x00);
     });
   });
 });

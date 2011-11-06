@@ -15,12 +15,16 @@ var _6510 = (function() {
   function TXS() {
     S = X;
   }
+  function TSX() {
+    X = S;
+  }
   function TYA() {
     A = Y;
   }
   return {
     TAX: TAX,
     TAY: TAY,
+    TSX: TSX,
     TXA: TXA,
     TXS: TXS,
     TYA: TYA,
