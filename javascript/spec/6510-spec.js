@@ -243,6 +243,11 @@ describe("in the 6510 instruction set", function() {
   });
   describe("TXA", function() {
     it("should transfer index x to accumulator", function() {
+      var v = 0x4d;
+      _6510.dbgSetX(v);
+      _6510.TXA();
+      expect(_6510.dbgGetA()).toEqual(v);
+      expect(_6510.dbgGetY()).toEqual(0x00);
     });
   });
   describe("TXS", function() {

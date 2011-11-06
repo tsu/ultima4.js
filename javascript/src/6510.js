@@ -8,9 +8,13 @@ var _6510 = (function() {
   function TAY() {
     Y = A;
   }
+  function TXA() {
+    A = X;
+  }
   return {
     TAX: TAX,
     TAY: TAY,
+    TXA: TXA,
     dbgSetA: function(v) { A = v; },
     dbgSetY: function(v) { Y = v; },
     dbgSetX: function(v) { X = v; },
