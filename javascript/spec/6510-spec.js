@@ -197,6 +197,11 @@ describe("in the 6510 instruction set", function() {
   });
   describe("TAX", function() {
     it("should transfer accumulator to index x", function() {
+      var v = 0x3f;
+      _6510.dbgSetAccumulator(v);
+      expect(_6510.dbgGetIndexRegisterX()).toEqual(0x00);
+      _6510.TAX();
+      expect(_6510.dbgGetIndexRegisterX()).toEqual(v);
     });
   });
   describe("TAY", function() {
