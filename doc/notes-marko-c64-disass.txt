@@ -1,6 +1,6 @@
 ;; code which seems to read block from disk. Triggered from example
 ;; on world map scrolling
---- A52F Read block from disk
+--- A52F Read/write block from/to disk
 .C:a52f   AD 14 A5   LDA $A514
 .C:a532   48         PHA
 .C:a533   18         CLC

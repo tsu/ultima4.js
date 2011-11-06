@@ -192,20 +192,21 @@
 .C:a486   8D 10 A5   STA $A510
 .C:a489   AD 05 A0   LDA $A005
 .C:a48c   8D 11 A5   STA $A511
-.C:a48f   A2 01      LDX #$01
+.C:a48f   A2 01      LDX #$01    ; counter=1
+:Loop_1
 .C:a491   AD 10 A5   LDA $A510
 .C:a494   38         SEC
-.C:a495   FD E4 A4   SBC $A4E4,X
+.C:a495   FD E4 A4   SBC $A4E4,X ; subtract # of sectors for track X
 .C:a498   8D 10 A5   STA $A510
 .C:a49b   AD 11 A5   LDA $A511
 .C:a49e   E9 00      SBC #$00
 .C:a4a0   8D 11 A5   STA $A511
 .C:a4a3   30 04      BMI $A4A9
-.C:a4a5   E8         INX
-.C:a4a6   4C 91 A4   JMP $A491
+.C:a4a5   E8         INX         ; inc counter
+.C:a4a6   4C 91 A4   JMP $A491   ; -> Loop_1
 .C:a4a9   AD 10 A5   LDA $A510
 .C:a4ac   18         CLC
-.C:a4ad   7D E4 A4   ADC $A4E4,X
+.C:a4ad   7D E4 A4   ADC $A4E4,X ; add number of sectors for track X
 .C:a4b0   8D 12 A5   STA $A512   ; sector # ?
 .C:a4b3   8E 13 A5   STX $A513   ; track # ?
 .C:a4b6   20 2F A5   JSR $A52F   ; read block from disk into ($0e)
