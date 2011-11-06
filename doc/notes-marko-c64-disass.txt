@@ -54,9 +54,9 @@
 .C:a57e   C8         INY
 .C:a57f   4C 74 A5   JMP $A574
 :Label_1
-.C:a582   AD 13 A5   LDA $A513    ; Load track # ?
+.C:a582   AD 13 A5   LDA $A513    ; Load track #
 .C:a585   20 95 A5   JSR $A595
-.C:a588   AD 12 A5   LDA $A512    ; Load sector # ?
+.C:a588   AD 12 A5   LDA $A512    ; Load sector #
 .C:a58b   20 95 A5   JSR $A595
 .C:a58e   20 CC FF   JSR $FFCC    ; CLRCHN
 .C:a591   20 27 A6   JSR $A627
@@ -80,7 +80,7 @@
 .C:a5a8   68         PLA        ; pop 2nd digit 
 .C:a5a9   20 AE A5   JSR $A5AE  ; write 2nd digit
 .C:a5ac   A9 10      LDA #$10   ; setup to output space char
-.C:a5ae   49 30      EOR #$30
+.C:a5ae   49 30      EOR #$30   
 .C:a5b0   20 D2 FF   JSR $FFD2  ; CHROUT
 .C:a5b3   60         RTS
 
