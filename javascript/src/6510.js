@@ -8,28 +8,32 @@ var _6510 = (function() {
   function TAY() {
     Y = A;
   }
-  function dbgSetAccumulator(v) {
+  function dbgSetA(v) {
     A = v;
   }
-  function dbgSetIndexRegisterX(v) {
+  function dbgSetX(v) {
     X = v;
   }
-  function dbgSetIndexRegisterY(v) {
+  function dbgSetY(v) {
     Y = v;
   }
-  function dbgGetIndexRegisterX() {
+  function dbgGetA() {
+    return A;
+  }
+  function dbgGetX() {
     return X;
   }
-  function dbgGetIndexRegisterY() {
+  function dbgGetY() {
     return Y;
   }
   return {
     TAX: TAX,
     TAY: TAY,
-    dbgSetAccumulator: dbgSetAccumulator,
-    dbgGetIndexRegisterX: dbgGetIndexRegisterX,
-    dbgSetIndexRegisterX: dbgSetIndexRegisterX,
-    dbgGetIndexRegisterY: dbgGetIndexRegisterY,
-    dbgSetIndexRegisterY: dbgSetIndexRegisterY
+    dbgSetA: dbgSetA,
+    dbgGetA: dbgGetA,
+    dbgGetX: dbgGetX,
+    dbgSetX: dbgSetX,
+    dbgGetY: dbgGetY,
+    dbgSetY: dbgSetY
   };
 })();
