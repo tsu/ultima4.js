@@ -1,4 +1,9 @@
 describe("in the 6510 instruction set", function() {
+  beforeEach(function() {
+    _6510.dbgSetAccumulator(0x00);
+    _6510.dbgSetIndexRegisterX(0x00);
+    _6510.dbgSetIndexRegisterY(0x00);
+  });
   describe("ADC", function() {
     it("should add memory to accumulator with carry", function() {
     });
@@ -199,13 +204,18 @@ describe("in the 6510 instruction set", function() {
     it("should transfer accumulator to index x", function() {
       var v = 0x3f;
       _6510.dbgSetAccumulator(v);
-      expect(_6510.dbgGetIndexRegisterX()).toEqual(0x00);
       _6510.TAX();
       expect(_6510.dbgGetIndexRegisterX()).toEqual(v);
+      expect(_6510.dbgGetIndexRegisterY()).toEqual(0x00);
     });
   });
   describe("TAY", function() {
     it("should transfer accumulator to index y", function() {
+      var v = 0x3f;
+      _6510.dbgSetAccumulator(v);
+      _6510.TAY();
+      expect(_6510.dbgGetIndexRegisterY()).toEqual(v);
+      expect(_6510.dbgGetIndexRegisterX()).toEqual(0x00);
     });
   });
   describe("TSX", function() {
