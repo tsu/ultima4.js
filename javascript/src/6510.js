@@ -11,10 +11,14 @@ var _6510 = (function() {
   function TXA() {
     A = X;
   }
+  function TYA() {
+    A = Y;
+  }
   return {
     TAX: TAX,
     TAY: TAY,
     TXA: TXA,
+    TYA: TYA,
     dbgSetA: function(v) { A = v; },
     dbgSetY: function(v) { Y = v; },
     dbgSetX: function(v) { X = v; },
