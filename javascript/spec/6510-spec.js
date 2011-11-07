@@ -158,11 +158,17 @@ describe("in the 6510 instruction set", function() {
     });
   });
   describe("LDX", function() {
-    it("should load index x with memory", function() {
+    it("should load index x with immediate value", function() {
+       var v = 0x43;
+      _6510.LDX_i(v);
+      expect(_6510.dbgGetX()).toEqual(v);
     });
   });
   describe("LDY", function() {
-    it("should load index y with memory", function() {
+    it("should load index y with immediate value", function() {
+       var v = 0x23;
+      _6510.LDY_i(v);
+      expect(_6510.dbgGetY()).toEqual(v);
     });
   });
   describe("LSR", function() {

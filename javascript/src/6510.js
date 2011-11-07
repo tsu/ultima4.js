@@ -13,6 +13,12 @@ var _6510 = (function() {
   function LDA_i(v) {
     A = v;
   }
+  function LDX_i(v) {
+    X = v;
+  }
+  function LDY_i(v) {
+    Y = v;
+  }
   function TAX() {
     X = A;
   }
@@ -34,6 +40,8 @@ var _6510 = (function() {
   return {
     CMP_i: CMP_i,
     LDA_i: LDA_i,
+    LDX_i: LDX_i,
+    LDY_i: LDY_i,
     TAX: TAX,
     TAY: TAY,
     TSX: TSX,
