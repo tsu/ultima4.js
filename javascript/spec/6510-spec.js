@@ -151,7 +151,10 @@ describe("in the 6510 instruction set", function() {
     });
   });
   describe("LDA", function() {
-    it("should load accumulator with memory", function() {
+    it("should load accumulator with immediate value", function() {
+       var v = 0x45;
+      _6510.LDA_i(v);
+      expect(_6510.dbgGetA()).toEqual(v);
     });
   });
   describe("LDX", function() {
