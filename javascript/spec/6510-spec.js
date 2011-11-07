@@ -102,9 +102,9 @@ describe("in the 6510 instruction set", function() {
     it("should set the Z flag if the given immediate value equals the value of the accumulator", function() {
       _6510.dbgSetA(0x34);
       _6510.CMP_i(0x34);
-      expect(_6510.dbgFlagSet(_6510.flags.Z)).toBeTruthy();
+      expect(_6510.dbgGetState()).toEqual([0x34, 0, 0, 0, _6510.flags.Z]);
       _6510.CMP_i(0xf2);
-      expect(_6510.dbgFlagSet(_6510.flags.Z)).toBeFalsy();
+      expect(_6510.dbgGetState()).toEqual([0x34, 0, 0, 0, 0]);
     });
   });
   describe("CPX", function() {
