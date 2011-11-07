@@ -12,19 +12,19 @@ describe("6510 debug functionality", function() {
     expect(_6510.dbgGetX()).toEqual(0xfa);
   });
   it("should get and set the stack pointer", function() {
-    _6510.dbgSetS(0xff);
-    expect(_6510.dbgGetS()).toEqual(0xfF);
+    _6510.dbgSetSP(0xff);
+    expect(_6510.dbgGetSP()).toEqual(0xfF);
   });
   it("should reset the 6510", function() {
     _6510.dbgSetA(0xf3);
     _6510.dbgSetY(0xa4);
     _6510.dbgSetX(0x87);
-    _6510.dbgSetS(0x11);
+    _6510.dbgSetSP(0x11);
     _6510.dbgReset();
     expect(_6510.dbgGetA()).toEqual(0x00);
     expect(_6510.dbgGetY()).toEqual(0x00);
     expect(_6510.dbgGetX()).toEqual(0x00);
-    expect(_6510.dbgGetS()).toEqual(0x00);
+    expect(_6510.dbgGetSP()).toEqual(0x00);
   });
 });
 describe("in the 6510 instruction set", function() {
@@ -98,7 +98,12 @@ describe("in the 6510 instruction set", function() {
     });
   });
   describe("CMP", function() {
-    it("should compare memory and accumulator", function() {
+    it("should set the Z flag if the given immediate value equals the value of the accumulator", function() {
+      _6510.dbgSetA(0x34);
+      _6510.CMP_i(0x34);
+      expect(_6510.dbgFlagSet(_6510.flags.Z)).toBeTruthy();
+      _6510.CMP_i(0xf2);
+      expect(_6510.dbgFlagSet(_6510.flags.Z)).toBeFalsy();
     });
   });
   describe("CPX", function() {
@@ -233,7 +238,7 @@ describe("in the 6510 instruction set", function() {
       expect(_6510.dbgGetX()).toEqual(v);
       expect(_6510.dbgGetA()).toEqual(v);
       expect(_6510.dbgGetY()).toEqual(0x00);
-      expect(_6510.dbgGetS()).toEqual(0x00);
+      expect(_6510.dbgGetSP()).toEqual(0x00);
     });
   });
   describe("TAY", function() {
@@ -244,16 +249,16 @@ describe("in the 6510 instruction set", function() {
       expect(_6510.dbgGetY()).toEqual(v);
       expect(_6510.dbgGetA()).toEqual(v);
       expect(_6510.dbgGetX()).toEqual(0x00);
-      expect(_6510.dbgGetS()).toEqual(0x00);
+      expect(_6510.dbgGetSP()).toEqual(0x00);
     });
   });
   describe("TSX", function() {
     it("should transfer stack pointer to index x", function() {
       var v = 0x4d;
-      _6510.dbgSetS(v);
+      _6510.dbgSetSP(v);
       _6510.TSX();
       expect(_6510.dbgGetX()).toEqual(v);
-      expect(_6510.dbgGetS()).toEqual(v);
+      expect(_6510.dbgGetSP()).toEqual(v);
       expect(_6510.dbgGetY()).toEqual(0x00);
       expect(_6510.dbgGetA()).toEqual(0x00);
     });
@@ -266,7 +271,7 @@ describe("in the 6510 instruction set", function() {
       expect(_6510.dbgGetA()).toEqual(v);
       expect(_6510.dbgGetX()).toEqual(v);
       expect(_6510.dbgGetY()).toEqual(0x00);
-      expect(_6510.dbgGetS()).toEqual(0x00);
+      expect(_6510.dbgGetSP()).toEqual(0x00);
     });
   });
   describe("TXS", function() {
@@ -274,7 +279,7 @@ describe("in the 6510 instruction set", function() {
       var v = 0x4d;
       _6510.dbgSetX(v);
       _6510.TXS();
-      expect(_6510.dbgGetS()).toEqual(v);
+      expect(_6510.dbgGetSP()).toEqual(v);
       expect(_6510.dbgGetX()).toEqual(v);
       expect(_6510.dbgGetY()).toEqual(0x00);
       expect(_6510.dbgGetA()).toEqual(0x00);
@@ -288,7 +293,7 @@ describe("in the 6510 instruction set", function() {
       expect(_6510.dbgGetA()).toEqual(v);
       expect(_6510.dbgGetY()).toEqual(v);
       expect(_6510.dbgGetX()).toEqual(0x00);
-      expect(_6510.dbgGetS()).toEqual(0x00);
+      expect(_6510.dbgGetSP()).toEqual(0x00);
     });
   });
 });
