@@ -7,7 +7,7 @@ var _6510 = (function() {
   var flags = {
     Z: 0x02
   };
-  function compare_immediate(r) {
+  function compareImmediate(r) {
     return function(v) {
       r === v ? (SR |= flags.Z) : (SR ^= flags.Z);
     };
@@ -40,9 +40,9 @@ var _6510 = (function() {
     A = Y;
   }
   return {
-    CMP_i: compare_immediate(A),
-    CPX_i: compare_immediate(X),
-    CPY_i: compare_immediate(Y),
+    CMP_i: compareImmediate(A),
+    CPX_i: compareImmediate(X),
+    CPY_i: compareImmediate(Y),
     LDA_i: LDA_i,
     LDX_i: LDX_i,
     LDY_i: LDY_i,
