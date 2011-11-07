@@ -10,6 +10,12 @@ var _6510 = (function() {
   function CMP_i(v) {
     A === v ? (SR |= flags.Z) : (SR ^= flags.Z);
   }
+  function CPX_i(v) {
+    X === v ? (SR |= flags.Z) : (SR ^= flags.Z);
+  }
+  function CPY_i(v) {
+    Y === v ? (SR |= flags.Z) : (SR ^= flags.Z);
+  }
   function LDA_i(v) {
     A = v;
   }
@@ -39,6 +45,8 @@ var _6510 = (function() {
   }
   return {
     CMP_i: CMP_i,
+    CPX_i: CPX_i,
+    CPY_i: CPY_i,
     LDA_i: LDA_i,
     LDX_i: LDX_i,
     LDY_i: LDY_i,

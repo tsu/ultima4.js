@@ -108,11 +108,21 @@ describe("in the 6510 instruction set", function() {
     });
   });
   describe("CPX", function() {
-    it("should compare memory and index x", function() {
+    it("should set the Z flag if the given immediate value equals the value of index x", function() {
+      _6510.dbgSetX(0x34);
+      _6510.CPX_i(0x34);
+      expect(_6510.dbgGetState()).toEqual([0, 0, 0x34, 0, _6510.flags.Z]);
+      _6510.CPX_i(0xf2);
+      expect(_6510.dbgGetState()).toEqual([0, 0, 0x34, 0, 0]);
     });
   });
   describe("CPY", function() {
-    it("should compare memory and index y", function() {
+    it("should set the Z flag if the given immediate value equals the value of index y", function() {
+      _6510.dbgSetY(0x32);
+      _6510.CPY_i(0x32);
+      expect(_6510.dbgGetState()).toEqual([0, 0x32, 0, 0, _6510.flags.Z]);
+      _6510.CPY_i(0xd2);
+      expect(_6510.dbgGetState()).toEqual([0, 0x32, 0, 0, 0]);
     });
   });
   describe("DEC", function() {
