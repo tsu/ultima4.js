@@ -7,14 +7,10 @@ var _6510 = (function() {
   var flags = {
     Z: 0x02
   };
-  function CMP_i(v) {
-    A === v ? (SR |= flags.Z) : (SR ^= flags.Z);
-  }
-  function CPX_i(v) {
-    X === v ? (SR |= flags.Z) : (SR ^= flags.Z);
-  }
-  function CPY_i(v) {
-    Y === v ? (SR |= flags.Z) : (SR ^= flags.Z);
+  function compare_immediate(r) {
+    return function(v) {
+      r === v ? (SR |= flags.Z) : (SR ^= flags.Z);
+    };
   }
   function LDA_i(v) {
     A = v;
@@ -44,9 +40,9 @@ var _6510 = (function() {
     A = Y;
   }
   return {
-    CMP_i: CMP_i,
-    CPX_i: CPX_i,
-    CPY_i: CPY_i,
+    CMP_i: compare_immediate(A),
+    CPX_i: compare_immediate(X),
+    CPY_i: compare_immediate(Y),
     LDA_i: LDA_i,
     LDX_i: LDX_i,
     LDY_i: LDY_i,
