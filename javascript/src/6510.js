@@ -53,16 +53,28 @@ var _6510 = (function() {
     dbgSetY: function(v) { Y = v; },
     dbgSetX: function(v) { X = v; },
     dbgSetSP: function(v) { SP = v; },
+    dbgSetSR: function(v) { SR = v; },
     dbgGetA: function() { return A; },
     dbgGetY: function() { return Y; },
     dbgGetX: function() { return X; },
     dbgGetSP: function() { return SP; },
+    dbgGetSR: function() { return SR; },
     dbgFlagSet: function(f) { return SR & f; },
     dbgReset: function() {
       _6510.dbgSetA(0x00);
       _6510.dbgSetY(0x00);
       _6510.dbgSetX(0x00);
       _6510.dbgSetSP(0x00);
+      _6510.dbgSetSR(0x00);
+    },
+    dbgGetState: function() {
+      return [
+        _6510.dbgGetA(),
+        _6510.dbgGetY(),
+        _6510.dbgGetX(),
+        _6510.dbgGetSP(),
+        _6510.dbgGetSR()
+      ];
     }
   };
 })();

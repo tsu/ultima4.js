@@ -13,7 +13,11 @@ describe("6510 debug functionality", function() {
   });
   it("should get and set the stack pointer", function() {
     _6510.dbgSetSP(0xff);
-    expect(_6510.dbgGetSP()).toEqual(0xfF);
+    expect(_6510.dbgGetSP()).toEqual(0xff);
+  });
+  it("should get and set the status register", function() {
+    _6510.dbgSetSR(0xfe);
+    expect(_6510.dbgGetSR()).toEqual(0xfe);
   });
   it("should reset the 6510", function() {
     _6510.dbgSetA(0xf3);
@@ -21,10 +25,7 @@ describe("6510 debug functionality", function() {
     _6510.dbgSetX(0x87);
     _6510.dbgSetSP(0x11);
     _6510.dbgReset();
-    expect(_6510.dbgGetA()).toEqual(0x00);
-    expect(_6510.dbgGetY()).toEqual(0x00);
-    expect(_6510.dbgGetX()).toEqual(0x00);
-    expect(_6510.dbgGetSP()).toEqual(0x00);
+    expect(_6510.dbgGetState()).toEqual([0x00, 0x00, 0x00, 0x00, 0x00]);
   });
 });
 describe("in the 6510 instruction set", function() {
@@ -154,21 +155,21 @@ describe("in the 6510 instruction set", function() {
     it("should load accumulator with immediate value", function() {
        var v = 0x45;
       _6510.LDA_i(v);
-      expect(_6510.dbgGetA()).toEqual(v);
+      expect(_6510.dbgGetState()).toEqual([v, 0x00, 0x00, 0x00, 0x00]);
     });
   });
   describe("LDX", function() {
     it("should load index x with immediate value", function() {
        var v = 0x43;
       _6510.LDX_i(v);
-      expect(_6510.dbgGetX()).toEqual(v);
+      expect(_6510.dbgGetState()).toEqual([0x00, 0x00, v, 0x00, 0x00]);
     });
   });
   describe("LDY", function() {
     it("should load index y with immediate value", function() {
        var v = 0x23;
       _6510.LDY_i(v);
-      expect(_6510.dbgGetY()).toEqual(v);
+      expect(_6510.dbgGetState()).toEqual([0x00, v, 0x00, 0x00, 0x00]);
     });
   });
   describe("LSR", function() {
@@ -244,10 +245,7 @@ describe("in the 6510 instruction set", function() {
       var v = 0x3f;
       _6510.dbgSetA(v);
       _6510.TAX();
-      expect(_6510.dbgGetX()).toEqual(v);
-      expect(_6510.dbgGetA()).toEqual(v);
-      expect(_6510.dbgGetY()).toEqual(0x00);
-      expect(_6510.dbgGetSP()).toEqual(0x00);
+      expect(_6510.dbgGetState()).toEqual([v, 0x00, v, 0x00, 0x00]);
     });
   });
   describe("TAY", function() {
@@ -255,10 +253,7 @@ describe("in the 6510 instruction set", function() {
       var v = 0x3f;
       _6510.dbgSetA(v);
       _6510.TAY();
-      expect(_6510.dbgGetY()).toEqual(v);
-      expect(_6510.dbgGetA()).toEqual(v);
-      expect(_6510.dbgGetX()).toEqual(0x00);
-      expect(_6510.dbgGetSP()).toEqual(0x00);
+      expect(_6510.dbgGetState()).toEqual([v, v, 0x00, 0x00, 0x00]);
     });
   });
   describe("TSX", function() {
@@ -266,10 +261,7 @@ describe("in the 6510 instruction set", function() {
       var v = 0x4d;
       _6510.dbgSetSP(v);
       _6510.TSX();
-      expect(_6510.dbgGetX()).toEqual(v);
-      expect(_6510.dbgGetSP()).toEqual(v);
-      expect(_6510.dbgGetY()).toEqual(0x00);
-      expect(_6510.dbgGetA()).toEqual(0x00);
+      expect(_6510.dbgGetState()).toEqual([0x00, 0x00, v, v, 0x00]);
     });
   });
   describe("TXA", function() {
@@ -277,10 +269,7 @@ describe("in the 6510 instruction set", function() {
       var v = 0x4d;
       _6510.dbgSetX(v);
       _6510.TXA();
-      expect(_6510.dbgGetA()).toEqual(v);
-      expect(_6510.dbgGetX()).toEqual(v);
-      expect(_6510.dbgGetY()).toEqual(0x00);
-      expect(_6510.dbgGetSP()).toEqual(0x00);
+      expect(_6510.dbgGetState()).toEqual([v, 0x00, v, 0x00, 0x00]);
     });
   });
   describe("TXS", function() {
@@ -288,10 +277,7 @@ describe("in the 6510 instruction set", function() {
       var v = 0x4d;
       _6510.dbgSetX(v);
       _6510.TXS();
-      expect(_6510.dbgGetSP()).toEqual(v);
-      expect(_6510.dbgGetX()).toEqual(v);
-      expect(_6510.dbgGetY()).toEqual(0x00);
-      expect(_6510.dbgGetA()).toEqual(0x00);
+      expect(_6510.dbgGetState()).toEqual([0x00, 0x00, v, v, 0x00]);
     });
   });
   describe("TYA", function() {
@@ -299,10 +285,7 @@ describe("in the 6510 instruction set", function() {
       var v = 0x4d;
       _6510.dbgSetY(v);
       _6510.TYA();
-      expect(_6510.dbgGetA()).toEqual(v);
-      expect(_6510.dbgGetY()).toEqual(v);
-      expect(_6510.dbgGetX()).toEqual(0x00);
-      expect(_6510.dbgGetSP()).toEqual(0x00);
+      expect(_6510.dbgGetState()).toEqual([v, v, 0x00, 0x00, 0x00]);
     });
   });
 });
