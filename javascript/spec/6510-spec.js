@@ -167,6 +167,12 @@ describe("in the 6510 instruction set", function() {
       _6510.LDA_i(v);
       expect(_6510.dbgGetState()).toEqual([v, 0x00, 0x00, 0x00, 0x00]);
     });
+    it("should set the Z flag if immediate value is 0", function() {
+      _6510.LDA_i(0);
+      expect(_6510.dbgGetState()).toEqual([0, 0, 0, 0, _6510.flags.Z]);
+      _6510.LDA_i(0x0f);
+      expect(_6510.dbgGetState()).toEqual([0x0f, 0, 0, 0, 0]);
+    });
   });
   describe("LDX", function() {
     it("should load index x with immediate value", function() {
@@ -174,12 +180,24 @@ describe("in the 6510 instruction set", function() {
       _6510.LDX_i(v);
       expect(_6510.dbgGetState()).toEqual([0x00, 0x00, v, 0x00, 0x00]);
     });
+    it("should set the Z flag if immediate value is 0", function() {
+      _6510.LDX_i(0);
+      expect(_6510.dbgGetState()).toEqual([0, 0, 0, 0, _6510.flags.Z]);
+      _6510.LDX_i(0x0f);
+      expect(_6510.dbgGetState()).toEqual([0, 0, 0x0f, 0, 0]);
+    });
   });
   describe("LDY", function() {
     it("should load index y with immediate value", function() {
        var v = 0x23;
       _6510.LDY_i(v);
       expect(_6510.dbgGetState()).toEqual([0x00, v, 0x00, 0x00, 0x00]);
+    });
+    it("should set the Z flag if immediate value is 0", function() {
+      _6510.LDY_i(0);
+      expect(_6510.dbgGetState()).toEqual([0, 0, 0, 0, _6510.flags.Z]);
+      _6510.LDY_i(0x0f);
+      expect(_6510.dbgGetState()).toEqual([0, 0x0f, 0, 0, 0]);
     });
   });
   describe("LSR", function() {

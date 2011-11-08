@@ -9,16 +9,25 @@ var _6510 = (function() {
   };
   function compareImmediate(r) {
     return function(v) {
-      r === v ? (SR |= flags.Z) : (SR ^= flags.Z);
+      ifTrueSetZ(r() === v);
     };
   }
+  function ifTrueSetZ(test) {
+     test ? (SR |= flags.Z) : (SR &= (0xff ^ flags.Z));
+  }
+  function ifZeroSetZ(v) {
+    ifTrueSetZ(v === 0);
+  }
   function LDA_i(v) {
+    ifZeroSetZ(v);
     A = v;
   }
   function LDX_i(v) {
+    ifZeroSetZ(v);
     X = v;
   }
   function LDY_i(v) {
+    ifZeroSetZ(v);
     Y = v;
   }
   function TAX() {
@@ -43,6 +52,9 @@ var _6510 = (function() {
     CMP_i: compareImmediate(A),
     CPX_i: compareImmediate(X),
     CPY_i: compareImmediate(Y),
+    CMP_i: compareImmediate(function() { return A; }),
+    CPX_i: compareImmediate(function() { return X; }),
+    CPY_i: compareImmediate(function() { return Y; }),
     LDA_i: LDA_i,
     LDX_i: LDX_i,
     LDY_i: LDY_i,
