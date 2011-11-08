@@ -43,9 +43,6 @@ var _6510 = (function() {
     A = Y;
   }
   return {
-    CMP_i: compareImmediate(A),
-    CPX_i: compareImmediate(X),
-    CPY_i: compareImmediate(Y),
     CMP_i: compareImmediate(function() { return A; }),
     CPX_i: compareImmediate(function() { return X; }),
     CPY_i: compareImmediate(function() { return Y; }),
