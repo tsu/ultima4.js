@@ -19,26 +19,36 @@
 	  (+ base 4096)
 	  (+ base 4096 8))))
 
+(defun blit-byte (byte image-data p)
+  "Copy 8 bits from byte to 8 pixels in array"
+  (dotimes (bit 8)
+    (setf (aref image-data (+ p bit))
+	  (if (logbitp (- 7 bit) byte) 
+	      255 
+	      0))))
+
+(defun blit-char-cell (cell image-data p)
+  "Blit char-cell of 8x8 bits into image array"
+  (dotimes (i 8)
+    (blit-byte (aref cell i) 
+	       image-data 
+	       (+ p (* 16 i)))))
+
 (defun tile-png (stream tile)
   "Read tile bitmap from streams and create PNG"
   (let* ((png (make-instance 'zpng:png :color-type :grayscale
-			    :width 16 :height 16))
-	 (data (zpng:data-array png))
-	 (dest-x 0)
-	 (dest-y 0))
-    (dolist (p (tile-offsets tile))
-      (file-position stream p)
-      (dotimes (y 8)
-	(let ((b (read-byte stream nil)))
-	  (dotimes (x 8)
-	    (setf (aref data (+ dest-y y) (+ dest-x x) 0) 
-		  (if (logbitp (- 7 x) b) 255 0)))))
-      (incf dest-x 8)
-      (when (>= dest-x 16)
-	(incf dest-y 8)
-	(setf dest-x 0)))
+			     :width 16 :height 16))
+	 (offsets (tile-offsets tile))
+	 (png-offsets (list 0 8 (* 8 16) (+ (* 8 16) 8)))
+	 (char-cell (make-array 8 :element-type '(unsigned-byte 8))))
+    (dotimes (i 4)
+      (file-position stream (nth i offsets))
+      (read-sequence char-cell stream)
+      (blit-char-cell char-cell 
+		      (zpng:image-data png) 
+		      (nth i png-offsets)))
     png))
-
+  
 ;;; Startup from command line
 (let ((argv sb-ext:*posix-argv*))
   (if (> (length argv) 2)
