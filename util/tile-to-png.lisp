@@ -3,13 +3,13 @@
 ;; Examples
 ;;
 ;; Read and create a single tile
-;;     util/tile-to-png.lisp c64u4/ULTIMA4A.D64 31
+;;     util/tile-to-png.lisp tile c64u4/ULTIMA4A.D64 31
 ;;
 ;; Read and create sequence of 10 tiles starting from 31
-;;     util/tile-to-png.lisp c64u4/ULTIMA4A.D64 31 10
+;;     util/tile-to-png.lisp tile c64u4/ULTIMA4A.D64 31 10
 ;;
 ;; Read create world map
-;;    util/tile-to-png.lisp c64u4/ULTIMA4A.D64 0 0 c64u4/ULTIMA4C.D64 
+;;    util/tile-to-png.lisp map c64u4/ULTIMA4A.D64 c64u4/ULTIMA4C.D64 
 
 ;; Quiclisp setup, normally in .sbclrc, which is not read with --script
 #-quicklisp
