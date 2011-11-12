@@ -8,6 +8,9 @@
 ;; Read and create sequence of 10 tiles starting from 31
 ;;     util/tile-to-png.lisp tile c64u4/ULTIMA4A.D64 31 10
 ;;
+;; Read and create all 256 tiles in matrix of 16x16
+;;     util/tile-to-png.lisp alltiles c64u4/ULTIMA4A.D64
+;;
 ;; Read create world map
 ;;    util/tile-to-png.lisp map c64u4/ULTIMA4A.D64 c64u4/ULTIMA4C.D64 
 
@@ -102,12 +105,13 @@
   (if (> (length argv) 1)
       (let ((cmd (nth 1 argv)))
 	(cond
+
 	  ((string= cmd "tile")	   
-	   (let* ((filename (nth 2 argv))
-		  (tile-id (parse-integer (nth 3 argv)))
-		  (count (if (> (length argv) 4)
-			     (parse-integer (nth 4 argv))
-			     1)))
+	   (let ((filename (nth 2 argv))
+		 (tile-id (parse-integer (nth 3 argv)))
+		 (count (if (> (length argv) 4)
+			    (parse-integer (nth 4 argv))
+			    1)))
 	     (with-open-file (in filename :element-type '(unsigned-byte 8))
 	       (dotimes (i count)
 		 (let ((filename-out (format nil "tile-~2,'0X.png" (+ tile-id i)))
@@ -116,9 +120,21 @@
 		   (tile-png in (+ tile-id i) png)
 		   (zpng:write-png png filename-out)
 		   (format t "Wrote file ~A~%" filename-out))))))
+
+	  ((string= cmd "alltiles")
+	    (let ((game-disk (nth 2 argv)))
+	      (with-open-file (in game-disk :element-type '(unsigned-byte 8))
+		(let ((png (make-instance 'zpng:png :color-type :truecolor
+					  :width 256 :height 256)))
+		  (dotimes (y 16)
+		    (dotimes (x 16)
+			(tile-png in (+ (* y 16) x) png (* x 16) (* y 16))))
+		  (zpng:write-png png "tiles.png")
+		  (format t "Wrote file tiles.png~%")))))
+
 	  ((string= cmd "map")
-	    (let* ((game-disk (nth 2 argv))
-		   (britannia-disk (nth 3 argv)))
+	    (let ((game-disk (nth 2 argv))
+		  (britannia-disk (nth 3 argv)))
 	      (with-open-file (in game-disk :element-type '(unsigned-byte 8))
 		(let ((png (make-instance 'zpng:png :color-type :truecolor
 					  :width (* 256 16) :height (* 256 16)))
@@ -129,9 +145,12 @@
 			(tile-png in tile png (* x 16) (* y 16)))))
 		  (zpng:write-png png "map.png")
 		  (format t "Wrote file map.png~%")))))
+
 	  (t
 	   (format t "error: unknown cmd ~A~%" cmd))))
+
       (format t "usage: tile-to-png.lisp <cmd> [<parameters>]~%~{~A~%~}"
 	      '("where cmd:"
-		"      tile   <game-disk> <tile-id> [<count>=1]"
-		"      map    <game-disk> <britannia-disk>"))))
+		"      tile     <game-disk> <tile-id> [<count>=1]"
+		"      alltiles <game-disk>"
+		"      map      <game-disk> <britannia-disk>"))))
