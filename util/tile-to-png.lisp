@@ -99,30 +99,39 @@
   
 ;;; Startup from command line
 (let ((argv sb-ext:*posix-argv*))
-  (if (> (length argv) 2)
-      (let* ((filename (nth 1 argv))
-	     (tile-id (parse-integer (nth 2 argv)))
-	     (count (if (> (length argv) 3)
-			(parse-integer (nth 3 argv))
-			1))
-	     (map (if (> (length argv) 4)
-		      (nth 4 argv))))
-	(with-open-file (in filename :element-type '(unsigned-byte 8))
-	  (if map
-	      (let ((png (make-instance 'zpng:png :color-type :truecolor
-					:width (* 256 16) :height (* 256 16)))
-		    (map (read-worldmap map)))
-		(dotimes (y 256)
-		  (dotimes (x 256)
-		    (let ((tile (aref map (+ (* y 256) x))))
-		      (tile-png in tile png (* x 16) (* y 16)))))
-		(zpng:write-png png "map.png")
-		(format t "Wrote file map.png~%"))
-	      (dotimes (i count)
-		(let ((filename-out (format nil "tile-~2,'0X.png" (+ tile-id i)))
-		      (png (make-instance 'zpng:png :color-type :truecolor
-					  :width 16 :height 16)))
-		  (tile-png in (+ tile-id i) png)
-		  (zpng:write-png png filename-out)
-		  (format t "Wrote file ~A~%" filename-out))))))
-      (format t "usage: tile-to-png.lisp <d64-file> <tile-id> [<count>=1] [<d64-map-disk>]~%")))
+  (if (> (length argv) 1)
+      (let ((cmd (nth 1 argv)))
+	(cond
+	  ((string= cmd "tile")	   
+	   (let* ((filename (nth 2 argv))
+		  (tile-id (parse-integer (nth 3 argv)))
+		  (count (if (> (length argv) 4)
+			     (parse-integer (nth 4 argv))
+			     1)))
+	     (with-open-file (in filename :element-type '(unsigned-byte 8))
+	       (dotimes (i count)
+		 (let ((filename-out (format nil "tile-~2,'0X.png" (+ tile-id i)))
+		       (png (make-instance 'zpng:png :color-type :truecolor
+					   :width 16 :height 16)))
+		   (tile-png in (+ tile-id i) png)
+		   (zpng:write-png png filename-out)
+		   (format t "Wrote file ~A~%" filename-out))))))
+	  ((string= cmd "map")
+	    (let* ((game-disk (nth 2 argv))
+		   (britannia-disk (nth 3 argv)))
+	      (with-open-file (in game-disk :element-type '(unsigned-byte 8))
+		(let ((png (make-instance 'zpng:png :color-type :truecolor
+					  :width (* 256 16) :height (* 256 16)))
+		      (map (read-worldmap britannia-disk)))
+		  (dotimes (y 256)
+		    (dotimes (x 256)
+		      (let ((tile (aref map (+ (* y 256) x))))
+			(tile-png in tile png (* x 16) (* y 16)))))
+		  (zpng:write-png png "map.png")
+		  (format t "Wrote file map.png~%")))))
+	  (t
+	   (format t "error: unknown cmd ~A~%" cmd))))
+      (format t "usage: tile-to-png.lisp <cmd> [<parameters>]~%~{~A~%~}"
+	      '("where cmd:"
+		"      tile   <game-disk> <tile-id> [<count>=1]"
+		"      map    <game-disk> <britannia-disk>"))))
