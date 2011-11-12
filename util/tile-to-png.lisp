@@ -65,21 +65,21 @@
 	(list x (+ x 8) x (+ x 8))
 	(list y y (+ y 8) (+ y 8))))
 
-(defun tile-colors (color-byte)
-  "Convert tile-core byte into list of RGB values"
-  (list (aref *palette* (logand color-byte #xF))
-	(aref *palette* (ash color-byte -4))))
+(defun tile-colors (stream tile)
+  "Read tile colors from stream. Return a list of RGB values."
+  (file-position stream (+ *tile-offset-color* tile))
+  (let ((b (read-byte stream)))
+    (list (aref *palette* (logand b #xF))
+	  (aref *palette* (ash b -4)))))
 	    
 (defun tile-png (stream tile png &optional (x 0) (y 0))
   "Read tile bitmap from streams and write into png-image"
-  (file-position stream (+ *tile-offset-color* tile))
-  (let* ((color-byte (read-byte stream))
-	 (tile-data (make-array (* 4 8) :element-type '(unsigned-byte 8))))
+  (let ((tile-data (make-array (* 4 8) :element-type '(unsigned-byte 8))))
     (file-position stream (+ *tile-offset-top-row* (* tile 2 8)))
     (read-sequence tile-data stream :start 0 :end 16)
     (file-position stream (+ *tile-offset-bottom-row* (* tile 2 8)))
     (read-sequence tile-data stream :start 16)
-    (blit-tile tile-data png x y (tile-colors color-byte))
+    (blit-tile tile-data png x y (tile-colors stream tile))
     png))
 
 (defun read-worldmap (filename)
