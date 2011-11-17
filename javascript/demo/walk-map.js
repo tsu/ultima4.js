@@ -1,5 +1,21 @@
 var map;
 var img;
+var dir = {
+  up: 38,
+  left: 37,
+  down: 40,
+  right: 39
+};
+var tileType = {
+  deepOcean: 0,
+  ocean: 1,
+  river: 2,
+  grass: 4,
+  bushes: 5,
+  forrest: 6,
+  hill: 7,
+  mountain: 8
+};
 var state = new Object();
 state.x=86;
 state.y=108;
@@ -30,19 +46,39 @@ function repaint() {
     drawViewport(g, state.x, state.y);
 }
 
+function canMoveTo(mapX, mapY) {
+  var ret = true;
+  var tile = getMapTileAt(mapX, mapY);
+  switch(tile) {
+  case tileType.ocean:
+  case tileType.river:
+  case tileType.mountain:
+    ret = false;
+  }
+  return ret;
+}
+
 function keyDown(e) {
     switch(e.keyCode) {
-    case 38: 
-	state.y--;
+    case dir.up:
+        if (canMoveTo(state.x, state.y - 1)) {
+          state.y--;
+        }
 	break;
-    case 37: 
-	state.x--;
+    case dir.left:
+        if (canMoveTo(state.x - 1, state.y)) {
+	  state.x--;
+        }
 	break;
-    case 40: 
-	state.y++;
+    case dir.down:
+        if (canMoveTo(state.x, state.y + 1)) {
+	  state.y++;
+        }
 	break;
-    case 39: 
-	state.x++;
+    case dir.right:
+        if (canMoveTo(state.x + 1, state.y)) {
+	  state.x++;
+        }
 	break;
     }
     repaint();
