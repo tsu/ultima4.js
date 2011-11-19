@@ -10,6 +10,7 @@
   (when (probe-file quicklisp-init)
     (load quicklisp-init)))
 
+(ql:quickload "cl-base64")
 
 (defun read-worldmap (filename)
   "Read worl map (tile codes) from file into array"
@@ -41,10 +42,14 @@
 							  (* y 256) 
 							  (+ (* y 256) 256)) 
 						  'list))))
+	      ((string= frmt "base64")
+	       (format t "~A~%"
+		       (cl-base64:usb8-array-to-base64-string data :columns 76)))	       	       
 	      (t
 	       (format t "error: unknown format: ~A~%" frmt)))
 	    (format t "error: could not read data from file: ~A~%" disk-name)))
       (format t "usage: generate-map-data.lisp <britannia-disk> <format>~%~{~A~%~}"
 	      '("where <format> is:"
-		"      hex      hex codes with two digits per byte, 256 bytes per line"))))
+		"      hex      hex codes with two digits per byte, 256 bytes per line"
+		"      base64   base64 encoded bytes, 76 chars per line"))))
 
