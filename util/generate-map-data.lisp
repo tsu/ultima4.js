@@ -42,7 +42,9 @@
   (when (probe-file quicklisp-init)
     (load quicklisp-init)))
 
-(ql:quickload "cl-base64")
+(let ((*standard-output* *error-output*))
+  (ql:quickload "cl-base64"))
+
 
 (defun read-worldmap (filename)
   "Read worl map (tile codes) from file into array"
