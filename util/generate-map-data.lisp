@@ -8,7 +8,7 @@
 ;;; encoding
 ;;     - if 7th bit is 0, then whole byte is the tile code
 ;;     - if 7th bit is 1, then
-;;          bits 3..6  is the count 0..31
+;;          bits 3..6  is the count 0..15
 ;;          bits 0..2  is the tile code 0..7
 ;;
 ;;   Rank Count Tile
@@ -69,7 +69,7 @@
 		(ash n 3)
 		byte))))
 
-(defun rle-encode (data)
+(defun rle-encode (data &optional (maxlen 15))
   "RLE encodes data in array and returns new array"
     (let ((buf (make-array (length data) :element-type '(unsigned-byte 8) :fill-pointer 0))
 	  (count 1)
@@ -82,8 +82,8 @@
 	(when prev
 	  (if (= prev byte)
 	      (if (<= 0 byte 7)
-		  (when (>= count 31)
-		    (vector-push (rle-encode-byte prev count) buf)
+		  (when (> count maxlen)
+		    (vector-push (rle-encode-byte prev (1- count)) buf)
 		    (setf count 1))
 		  (progn
 		    (vector-push (rle-encode-byte prev count) buf)
