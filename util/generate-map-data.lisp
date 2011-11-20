@@ -59,6 +59,43 @@
 	      (read-sequence map in :start (+ p (* i 256)) :end (+ p (* i 256) 16)))))
 	map))))
 
+(defun rle-encode-byte (byte n)
+  "Encode one run of n bytes into single byte"
+  (if (= n 1)
+      byte
+      (when (and (<= 0 n 31)
+		 (<= 0 byte 7))
+	(logior (ash 1 7)
+		(ash n 3)
+		byte))))
+
+(defun rle-encode (data)
+  "RLE encodes data in array and returns new array"
+    (let ((buf (make-array (length data) :element-type '(unsigned-byte 8) :fill-pointer 0))
+	  (count 1)
+	  (prev nil))
+      (dolist (byte (coerce data 'list))
+	(when (and prev
+		   (<= 0 byte 7)
+		   (= prev byte))
+	    (incf count))
+	(when prev
+	  (if (= prev byte)
+	      (if (<= 0 byte 7)
+		  (when (>= count 31)
+		    (vector-push (rle-encode-byte prev count) buf)
+		    (setf count 1))
+		  (progn
+		    (vector-push (rle-encode-byte prev count) buf)
+		    (setf count 1)))
+	      (progn
+		(vector-push (rle-encode-byte prev count) buf)
+		(setf count 1))))	      
+	(setf prev byte))
+      (vector-push (rle-encode-byte prev count) buf)
+      buf))
+		  
+	  
 
 ;;; Startup from command line
 (let ((argv sb-ext:*posix-argv*))
@@ -76,12 +113,16 @@
 						  'list))))
 	      ((string= frmt "base64")
 	       (format t "~A~%"
-		       (cl-base64:usb8-array-to-base64-string data :columns 76)))	       	       
+		       (cl-base64:usb8-array-to-base64-string data :columns 76)))
+	      ((string= frmt "rle-base64")
+	       (format t "~A~%"
+		       (cl-base64:usb8-array-to-base64-string (rle-encode data) :columns 76)))
 	      (t
 	       (format t "error: unknown format: ~A~%" frmt)))
 	    (format t "error: could not read data from file: ~A~%" disk-name)))
       (format t "usage: generate-map-data.lisp <britannia-disk> <format>~%~{~A~%~}"
 	      '("where <format> is:"
-		"      hex      hex codes with two digits per byte, 256 bytes per line"
-		"      base64   base64 encoded bytes, 76 chars per line"))))
+		"      hex         hex codes with two digits per byte, 256 bytes per line"
+		"      base64      base64 encoded bytes, 76 chars per line"
+		"      rle-base64  run length encoded + base64 encodede"))))
 
