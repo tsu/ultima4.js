@@ -323,6 +323,43 @@ ultima4.gameData = (function() {
     "+Jip+ACp+Pj4+Pi4yfj4+Pj4+Pj4+KiZ+Pj4+Pj4+ACp+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4"+
     "+Pj4+Pj4+Pj4+PiY";
 
+  var font = 
+    "ffffffffffffffffffffffffffffffff00ffffffffffffff00ffffffffff"+
+    "ffffffffffffffffff00ffffffffffffff0000ffffffffffff0000ffffff"+
+    "ffffff003f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3ffcfcfcfcfcfcfcfcfcfc"+
+    "fcfcfcfcfcfc3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3cffc3c3c3c3c3c3ff"+
+    "ffddffffffffddff00030f1f3f3f7f7f00030f1f3f3f7f7f00c0f0f8fcfc"+
+    "fefe00c0f0f8fcfcfefe7f7f3f3f1f0f03007f7f3f3f1f0f0300fefefcfc"+
+    "f8f0c000fefefcfcf8f0c000183c7e181818181818181818187e3c18183c"+
+    "7e18187e3c180000387c7c38000000030f3f3f0f030000030f3f3f0f0300"+
+    "00c0f0fcfcf0c00000c0f0fcfcf0c0000000000000000000001818181800"+
+    "18180036366c00000000006cfe6c6cfe6c0000103c70381c78100000666c"+
+    "183666000070d8d876dcdc760018183000000000000c18303030180c0060"+
+    "301818183060000010387c381000000018187e1818000000000000181830"+
+    "000000007c000000000000000000181878cccc78fc30303000386c6c6c6c"+
+    "6c38000818381818183c00386c0c1830607c00386c0c380c6c38006c6c6c"+
+    "7c0c0c0c007c60780c0c6c38000c1830786c6c38007c0c0c183030300038"+
+    "6c6c386c6c3800386c6c3c18306000001818001818000000181800181808"+
+    "000c18306030180c0000007c007c0000006030180c18306000386c0c1800"+
+    "1818ffffffffffffffff000e1e36363e3666007c36363c36367c001c3660"+
+    "6060663c007c36363636367c007e30303c30307e003e30303c303060001c"+
+    "3660606e663c006666667e666666007e18181818187e003e06060666663c"+
+    "00666c7870786c66003030303030386e0042667e7e666666004666767e6e"+
+    "6662003c66666666663c007c66667c606070003c666666666c36007c6666"+
+    "7c6c6666001c36603c06663c007e181818181818006666666666663c0066"+
+    "666666663c1800666666667e66420066663c183c6666006666663c181818"+
+    "007e060c7e30607e007c60606060607c001e0e1a386c6c38007c0c0c0c0c"+
+    "0c7c000010386c0000000038fefefefe38000000007e7e3c7e000000003c"+
+    "6c6c6c360030303c3636366c0000003c6660663c000c0c3c6c6c6c360000"+
+    "003c667e603e001c36307e3030600000003c663e067c00606060786c6c66"+
+    "000018001818183c000c000c0c6c6c38006060666c786c66003818181818"+
+    "183c00000042667e66660000006c766666660000003c6666663c0000007c"+
+    "667c60700000003e663c0c060000006c766060600000003c603c067c0030"+
+    "307c3030361c0000006c6c6c6c360000006666663c1800000066667e6642"+
+    "000000663c183c6600000066663e0c380000007e0c18307e003c66663c18"+
+    "3c18007cfec6d6decc600078fcccd8c2fe7c000c66f6d6c6fe7c007cfe86"+
+    "36667e3c";
+
   function rleDecode(data) {
     var buf = "";
     for (i=0; i<data.length; i++) {
@@ -341,13 +378,30 @@ ultima4.gameData = (function() {
 
   return {
     tiles: tiles,
-    worldMap: rleDecode(atob(rleMapData))
+    worldMap: rleDecode(atob(rleMapData)),
+    font: font
   };
 }());
 
 ultima4.main = (function() {
   function getMapTileAt(x, y) {
     return map.charCodeAt(y*256+x);
+  }
+
+  function drawChar(g, c, fgColor, bgColor, x, y) {
+    for (row=0; row<8; row++) {
+      var b =  parseInt(ultima4.gameData.font.substr(c*8*2 + row*2, 2), 16);
+      for (i=7; i>=0; i--) {
+        g.fillStyle = (b & (1<<i)) ? fgColor : bgColor;
+        g.fillRect(x+8*2-(i+1)*2, y+row*2, 2, 2);
+      }        
+    }
+  }
+
+  function drawText(g, s, fgColor, bgColor, x, y) {
+    for (var i=0; i<s.length; i++) {
+      drawChar(g, s.charCodeAt(i), fgColor, bgColor, x+i*8*2, y);
+    }
   }
 
   function drawTile(g, tile, x, y) {
@@ -367,11 +421,10 @@ ultima4.main = (function() {
 
   function repaint() {
     var g = canvas.getContext("2d");
-    g.fillStyle = '#fff';
-    g.strokeStyle = '#000';
+    g.fillStyle = '#000';
     g.fillRect(0, 0, canvas.width, canvas.height);
-    g.strokeRect(0, 0, canvas.width, canvas.height);
     drawViewport(g, state.x, state.y);
+    drawText(g, "Ultima IV", '#eee', '#000', 100, 0);
   }
 
   function canMoveTo(mapX, mapY) {
@@ -414,8 +467,8 @@ ultima4.main = (function() {
 
   function createCanvas() {
     var canvas = document.createElement("canvas");
-    canvas.width = 600;
-    canvas.height = 480;
+    canvas.width = 320*2;
+    canvas.height = 200*2;
     return canvas;
   }
 
