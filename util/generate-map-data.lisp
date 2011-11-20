@@ -65,7 +65,7 @@
   "Encode one run of n bytes into single byte"
   (if (= n 1)
       byte
-      (when (and (<= 0 n 31)
+      (when (and (<= 0 n 15)
 		 (<= 0 byte 7))
 	(logior (ash 1 7)
 		(ash n 3)
