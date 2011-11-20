@@ -1,7 +1,39 @@
 #!/usr/local/bin/sbcl --script
 ;;;; generate ultima4 map data from d64 disk image
-;; Example
+;; Examples
 ;;   ./generate-map-data.lisp ../c64u4/ULTIMA4C.D64 hex
+;;   ./generate-map-data.lisp ../c64u4/ULTIMA4C.D64 base64
+
+;;; Histogram of tile codes in ultima4 world map, which leads to run lenght 
+;;; encoding
+;;     - if 7th bit is 0, then whole byte is the tile code
+;;     - if 7th bit is 1, then
+;;          bits 3..6  is the count 0..31
+;;          bits 0..2  is the tile code 0..7
+;;
+;;   Rank Count Tile
+;;     1  34014 00
+;;     2  10336 01
+;;     3   7159 04
+;;     4   4924 05
+;;     5   2328 07
+;;     6   2304 06
+;;     7   1933 02
+;;     8   1745 08
+;;     9    666 03
+;;    10     70 4c
+;;    11     17 17
+;;    12      7 46
+;;    13      7 1e
+;;    14      7 0a
+;;    15      7 09
+;;    16      4 0c
+;;    17      3 0b
+;;    18      1 3d
+;;    19      1 1d
+;;    20      1 0f
+;;    21      1 0e
+;;    22      1 0d
 
 ;; Quiclisp setup, normally in .sbclrc, which is not read with --script
 #-quicklisp
