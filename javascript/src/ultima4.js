@@ -36,18 +36,28 @@ ultima4.main = (function() {
   }
 
   function drawChar(g, c, fgColor, bgColor, x, y) {
-    for (row=0; row<8; row++) {
-      var b =  parseInt(ultima4.gameData.font.substr(c*8*2 + row*2, 2), 16);
-      for (i=7; i>=0; i--) {
-        g.fillStyle = (b & (1<<i)) ? fgColor : bgColor;
-        g.fillRect(x+8*2-(i+1)*2, y+row*2, 2, 2);
-      }        
+    if(c>=0 && c<=127) {
+      for (row=0; row<8; row++) {
+        var b =  parseInt(ultima4.gameData.font.substr(c*8*2 + row*2, 2), 16);
+        for (i=7; i>=0; i--) {
+          g.fillStyle = (b & (1<<i)) ? fgColor : bgColor;
+          g.fillRect(x+8*2-(i+1)*2, y+row*2, 2, 2);
+        }        
+      }
     }
   }
 
   function drawText(g, s, fgColor, bgColor, x, y) {
     for (var i=0; i<s.length; i++) {
       drawChar(g, s.charCodeAt(i), fgColor, bgColor, x+i*8*2, y);
+    }
+  }
+
+  function drawCharLine(g, c, fgColor, bgColor, x, y, dx, dy, n) {
+    for(var i=0; i<n; i++) {
+      drawChar(g, c, fgColor, bgColor, x, y);
+      x += dx;
+      y += dy;
     }
   }
 
@@ -66,12 +76,55 @@ ultima4.main = (function() {
     drawTile(g, 31, ox, oy);
   }
 
+  function drawScreenFrames(g) {
+    // Top row
+    drawChar(g, 16, palette[14], palette[0], 0, 0);
+    drawCharLine(g, 4, palette[14], palette[1], 16, 0, 16, 0, 9);
+    drawChar(g, 30, palette[14], palette[0], 10*16, 0);
+    drawChar(g, 28, palette[14], palette[0], 13*16, 0);
+    drawCharLine(g, 4, palette[14], palette[1], 14*16, 0, 16, 0, 9);
+    drawChar(g, 0, palette[14], palette[0], 23*16, 0);
+    drawCharLine(g, 4, palette[14], palette[1], 24*16, 0, 16, 0, 15);
+    drawChar(g, 18, palette[14], palette[0], 39*16, 0);
+
+    // Left column
+    drawCharLine(g, 10, palette[14], palette[1], 0, 16, 0, 16, 22);
+    drawChar(g, 20, palette[14], palette[0], 0, 23*16);
+
+    // Bottom row
+    drawCharLine(g, 2, palette[14], palette[1], 16, 23*16, 16, 0, 5);
+    drawChar(g, 30, palette[14], palette[0], 6*16, 23*16);
+    drawChar(g, 28, palette[14], palette[0], 16*16, 23*16);
+    drawCharLine(g, 2, palette[14], palette[1], 17*16, 23*16, 16, 0, 6);
+
+    // Center column
+    drawCharLine(g, 12, palette[14], palette[1], 23*16, 16, 0, 16, 8);
+    drawChar(g, 8, palette[14], palette[1], 23*16, 9*16);
+    drawChar(g, 12, palette[14], palette[1], 23*16, 10*16);
+    drawChar(g, 8, palette[14], palette[1], 23*16, 11*16);
+    drawCharLine(g, 12, palette[14], palette[1], 23*16, 12*16, 0, 16, 11);
+    drawChar(g, 10, palette[14], palette[1], 23*16, 23*16);
+
+    // Right column
+    drawCharLine(g, 8, palette[14], palette[1], 39*16, 16, 0, 16, 8);
+    drawChar(g, 0, palette[14], palette[1], 39*16, 9*16);
+    drawChar(g, 8, palette[14], palette[1], 39*16, 10*16);
+
+    // Right side horizontaö bars
+    drawCharLine(g, 6, palette[14], palette[1], 24*16, 9*16, 16, 0, 15);
+    drawCharLine(g, 6, palette[14], palette[1], 24*16, 11*16, 16, 0, 15);
+    drawChar(g, 4, palette[14], palette[1], 39*16, 11*16);
+  }
+
   function repaint() {
     var g = canvas.getContext("2d");
     g.fillStyle = '#000';
     g.fillRect(0, 0, canvas.width, canvas.height);
+    drawScreenFrames(g);
     drawViewport(g, state.x, state.y);
-    drawText(g, "Ultima IV", '#eee', '#000', 100, 0);
+    drawText(g,"Welcome to", palette[1], palette[0], 24*16, 12*16);
+    drawText(g,"Ultima IV", palette[1], palette[0], 24*16, 13*16);
+    drawText(g, String.fromCharCode(30)+String.fromCharCode(125), palette[1], palette[0], 24*16, 15*16);
   }
 
   function canMoveTo(mapX, mapY) {
@@ -152,6 +205,11 @@ ultima4.main = (function() {
     x: 86,
     y: 108
   };
+
+  var palette = ["#000000", "#FDFEFC", "#BE1A24", "#30E6C6",
+                 "#B41AE2", "#1FD21E", "#211BAE", "#DFF60A", 
+		 "#B84104", "#6A3304", "#FE4A57", "#424540",
+		 "#70746F", "#59FE59", "#5F53FE", "#A4A7A2"];
 
   var map = ultima4.gameData.worldMap;
   var tiles = createTiles();
