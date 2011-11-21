@@ -70,10 +70,68 @@ ultima4.main = (function() {
     var oy = 16 + 5*32;
     for (var y=-5; y<=5; y++) {
       for (var x=-5; x<=5; x++) {
-        drawTile(g, getMapTileAt(mapX+x,mapY+y), ox + x*32, oy + y*32);
+        var tile = !isTileInLineOfSight(x, y) ? tileType.empty : getMapTileAt(mapX+x,mapY+y);
+        drawTile(g, tile, ox + x*32, oy + y*32);
       }
     }
+
     drawTile(g, 31, ox, oy);
+
+    function isTileInLineOfSight(x, y) {
+      var blockingTiles = numberOfSightBlockersOnLine(0, 0, x, y);
+      if (blocksView(getMapTileAt(mapX+x,mapY+y)) && blockingTiles <= 1) {
+        return true;
+      } else {
+        return blockingTiles == 0;
+      }
+    }
+
+    function blocksView(tile) {
+      return tile == tileType.mountain || tile == tileType.forrest;
+    }
+
+    function numberOfSightBlockersOnLine(x0, y0, x1, y1) {
+      var origX1 = x1;
+      var origY1 = y1;
+      var steep = Math.abs(y1-y0) > Math.abs(x1-x0);
+      if (steep) {
+        var tmp = x0;
+        x0 = y0;
+        y0 = tmp;
+        tmp = x1;
+        x1 = y1;
+        y1 = tmp;
+      }
+
+      if (x0 > x1) {
+        var tmp = x0;
+        x0 = x1;
+        x1 = tmp;
+        tmp = y0;
+        y0 = y1;
+        y1 = tmp;
+      }
+
+      var deltaX = x1 - x0;
+      var deltaY = Math.abs(y1 - y0);
+      var error = 0;
+      var deltaError = deltaY/deltaX;
+      var ystep = (y0 < y1) ? 1 : -1;
+      var y = y0;
+      var blockingTiles = 0;
+      for (var x=x0; x<=x1; x++) {
+        var tile = steep ? getMapTileAt(mapX+y,mapY+x) : getMapTileAt(mapX+x,mapY+y);
+        if (!(y == 0 && x == 0) && blocksView(tile)) {
+          blockingTiles += 1;
+        }
+        error = error + deltaError;
+        if (error >= 0.5) {
+          y += ystep;
+          error -= 1.0;
+        }
+      }
+      return blockingTiles;
+    }
   }
 
   function drawScreenFrames(g) {
@@ -201,7 +259,8 @@ ultima4.main = (function() {
     bushes: 5,
     forrest: 6,
     hill: 7,
-    mountain: 8
+    mountain: 8,
+    empty: 69
   };
 
   var state = {
