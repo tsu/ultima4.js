@@ -122,6 +122,9 @@ ultima4.main = (function() {
     g.fillRect(0, 0, canvas.width, canvas.height);
     drawScreenFrames(g);
     drawViewport(g, state.x, state.y);
+    drawText(g, "1-TSU      125G", palette[1], palette[0], 24*16, 1*16);
+    drawText(g, "2-MKA      125G", palette[1], palette[0], 24*16, 2*16);
+    drawText(g, "F:0200   G:0200", palette[1], palette[0], 24*16, 10*16);
     drawText(g,"Welcome to", palette[1], palette[0], 24*16, 12*16);
     drawText(g,"Ultima IV", palette[1], palette[0], 24*16, 13*16);
     drawText(g, String.fromCharCode(30)+String.fromCharCode(125), palette[1], palette[0], 24*16, 15*16);
