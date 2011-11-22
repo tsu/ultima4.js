@@ -224,8 +224,9 @@ ultima4.main = (function() {
         state.x = newState.x;
         state.y = newState.y;
       } else {
-        repl.pushText("Blocked!");
+        repl.pushText("BLOCKED!");
       }
+      repl.pushText("");
     };
 
     function canMoveTo(mapX, mapY) {
