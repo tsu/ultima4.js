@@ -155,6 +155,175 @@
 .C:14a8   60         RTS        ; return
 
 
+--- 160E Scroll message frame up?
+.C:160e   A2 60      LDX #$60
+.C:1610   BD 00 E0   LDA $E000,X
+.C:1613   18         CLC
+.C:1614   69 C0      ADC #$C0
+.C:1616   8D 38 16   STA $1638
+.C:1619   BD C0 E0   LDA $E0C0,X
+.C:161c   69 00      ADC #$00
+.C:161e   8D 39 16   STA $1639     ; self modifying code? setting row
+.C:1621   BD 08 E0   LDA $E008,X   ;    to scroll?
+.C:1624   18         CLC
+.C:1625   69 C0      ADC #$C0
+.C:1627   8D 35 16   STA $1635
+.C:162a   BD C8 E0   LDA $E0C8,X
+.C:162d   69 00      ADC #$00
+.C:162f   8D 36 16   STA $1636
+.C:1632   A0 00      LDY #$00
+.C:1634   B9 80 3D   LDA $3D80,Y   ; inside screen bitmap? char co: 24,23
+.C:1637   99 40 3C   STA $3C40,Y   ; one char row above. scrolling
+.C:163a   C8         INY           ;   text up? 16 cols?
+.C:163b   10 F7      BPL $1634
+.C:163d   8A         TXA
+.C:163e   4A         LSR A
+.C:163f   4A         LSR A
+.C:1640   4A         LSR A
+.C:1641   A8         TAY
+.C:1642   B9 80 E1   LDA $E180,Y
+.C:1645   8D 60 16   STA $1660
+.C:1648   B9 98 E1   LDA $E198,Y
+.C:164b   8D 61 16   STA $1661
+.C:164e   B9 81 E1   LDA $E181,Y
+.C:1651   8D 5D 16   STA $165D
+.C:1654   B9 99 E1   LDA $E199,Y
+.C:1657   8D 5E 16   STA $165E
+.C:165a   A0 18      LDY #$18
+.C:165c   B9 98 07   LDA $0798,Y   ; scroll screen colors up?
+.C:165f   99 70 07   STA $0770,Y
+.C:1662   C8         INY
+.C:1663   C0 28      CPY #$28
+.C:1665   D0 F5      BNE $165C
+.C:1667   8A         TXA
+.C:1668   18         CLC
+.C:1669   69 08      ADC #$08
+.C:166b   AA         TAX
+.C:166c   E0 B8      CPX #$B8      ; $b8=184, 184/8=23. scroll until
+.C:166e   D0 A0      BNE $1610     ;   row 23?
+.C:1670   20 06 17   JSR $1706     ; Somehow this jsr is never RTS:ed from
+.C:1673   18         CLC           ;    ????
+.C:1674   17 20      SLO $20,X     ; illegal op, dirty code?
+.C:1676   20 20 20   JSR $2020
+.C:1679   20 20 20   JSR $2020
+.C:167c   20 20 20   JSR $2020
+.C:167f   20 20 20   JSR $2020
+.C:1682   20 20 20   JSR $2020
+.C:1685   FF 60 85   ISB $8560,X
+.C:1688   3D A5 4F   AND $4FA5,X
+... garbled ....
+.C:1686   60         RTS
+... garbled ...
+
+
+--- 1687
+.C:1687   85 3D      STA $3D
+.C:1689   A5 4F      LDA $4F
+.C:168b   0A         ASL A
+.C:168c   0A         ASL A
+.C:168d   0A         ASL A
+.C:168e   85 3E      STA $3E
+.C:1690   A5 3D      LDA $3D
+.C:1692   20 E6 16   JSR $16E6
+.C:1695   8D C3 16   STA $16C3
+.C:1698   8A         TXA
+.C:1699   18         CLC
+.C:169a   69 E4      ADC #$E4
+.C:169c   8D C4 16   STA $16C4
+.C:169f   A4 3E      LDY $3E
+.C:16a1   B9 00 E0   LDA $E000,Y
+.C:16a4   8D C6 16   STA $16C6
+.C:16a7   B9 C0 E0   LDA $E0C0,Y
+.C:16aa   8D C7 16   STA $16C7
+.C:16ad   A5 4E      LDA $4E
+.C:16af   20 E6 16   JSR $16E6
+.C:16b2   18         CLC
+.C:16b3   6D C6 16   ADC $16C6
+.C:16b6   8D C6 16   STA $16C6
+.C:16b9   8A         TXA
+.C:16ba   6D C7 16   ADC $16C7
+.C:16bd   8D C7 16   STA $16C7
+.C:16c0   A0 07      LDY #$07
+.C:16c2   B9 E8 E4   LDA $E4E8,Y
+.C:16c5   99 48 3D   STA $3D48,Y
+.C:16c8   88         DEY
+.C:16c9   10 F7      BPL $16C2
+.C:16cb   A4 4F      LDY $4F
+.C:16cd   B9 80 E1   LDA $E180,Y
+.C:16d0   8D E1 16   STA $16E1
+.C:16d3   B9 98 E1   LDA $E198,Y
+.C:16d6   8D E2 16   STA $16E2
+.C:16d9   A4 3D      LDY $3D
+.C:16db   B9 B0 E2   LDA $E2B0,Y
+.C:16de   A4 4E      LDY $4E
+.C:16e0   99 98 07   STA $0798,Y
+.C:16e3   A0 00      LDY #$00
+.C:16e5   60         RTS
+
+
+
+--- 16E6
+.C:16e6   48         PHA
+.C:16e7   A9 00      LDA #$00
+.C:16e9   8D FD 16   STA $16FD
+.C:16ec   68         PLA
+.C:16ed   0A         ASL A
+.C:16ee   2E FD 16   ROL $16FD
+.C:16f1   0A         ASL A
+.C:16f2   2E FD 16   ROL $16FD
+.C:16f5   0A         ASL A
+.C:16f6   2E FD 16   ROL $16FD
+.C:16f9   AE FD 16   LDX $16FD
+.C:16fc   60         RTS
+
+
+--- 1706
+.C:1706   A9 00      LDA #$00
+.C:1708   8D 5C 17   STA $175C
+.C:170b   A5 4E      LDA $4E
+.C:170d   8D 5D 17   STA $175D
+.C:1710   A5 4F      LDA $4F
+.C:1712   8D 5E 17   STA $175E
+.C:1715   68         PLA
+.C:1716   85 7C      STA $7C
+.C:1718   68         PLA
+.C:1719   85 7D      STA $7D
+.C:171b   20 55 17   JSR $1755
+.C:171e   A0 00      LDY #$00
+.C:1720   B1 7C      LDA ($7C),Y
+.C:1722   85 4E      STA $4E
+.C:1724   20 55 17   JSR $1755
+.C:1727   B1 7C      LDA ($7C),Y
+.C:1729   85 4F      STA $4F
+.C:172b   20 55 17   JSR $1755
+.C:172e   B1 7C      LDA ($7C),Y
+.C:1730   30 12      BMI $1744
+.C:1732   20 87 16   JSR $1687    ; --^ ?
+.C:1735   2C 5C 17   BIT $175C
+.C:1738   30 05      BMI $173F
+.C:173a   E6 4E      INC $4E
+.C:173c   4C 2B 17   JMP $172B
+.C:173f   E6 4F      INC $4F
+.C:1741   4C 2B 17   JMP $172B
+.C:1744   A5 7D      LDA $7D
+.C:1746   48         PHA
+.C:1747   A5 7C      LDA $7C
+.C:1749   48         PHA
+.C:174a   AD 5D 17   LDA $175D
+.C:174d   85 4E      STA $4E
+.C:174f   AD 5E 17   LDA $175E
+.C:1752   85 4F      STA $4F
+.C:1754   60         RTS
+
+
+--- 1755
+.C:1755   E6 7C      INC $7C
+.C:1757   D0 02      BNE $175B
+.C:1759   E6 7D      INC $7D
+.C:175b   60         RTS
+
+
+
 --- A100
 .C:a100   4C 2E A1   JMP $A12E
 .C:a103   4C 5E A4   JMP $A45E

@@ -9,20 +9,43 @@
 .C:1584   09 80      ORA #$80
 .C:1586   28         PLP
 .C:1587   F0 17      BEQ $15A0
-.C:1589   C9 A0      CMP #$A0
+.C:1589   C9 A0      CMP #$A0      ; Space?
 .C:158b   D0 04      BNE $1591
 .C:158d   A0 00      LDY #$00
 .C:158f   84 38      STY $38
 .C:1591   EA         NOP
 .C:1592   A4 38      LDY $38
 .C:1594   C0 08      CPY #$08
-.C:1596   B0 08      BCS $15A0
-.C:1598   99 30 00   STA $0030,Y
+.C:1596   B0 08      BCS $15A0     ; Y >= 8 ?
+.C:1598   99 30 00   STA $0030,Y   ;   no Y < 8
 .C:159b   E6 38      INC $38
 .C:159d   20 A1 15   JSR $15A1
 .C:15a0   60         RTS
 
 
+--- 15A1 keyboard related, called from 157E. A=key just read
+.C:15a1   48         PHA
+.C:15a2   A9 00      LDA #$00
+.C:15a4   85 C6      STA $C6
+.C:15a6   68         PLA
+.C:15a7   60         RTS
+
+--- 15A8 keyboard related?
+.C:15a8   A5 38      LDA $38
+.C:15aa   F0 17      BEQ $15C3
+.C:15ac   A5 30      LDA $30
+.C:15ae   48         PHA
+.C:15af   C6 38      DEC $38
+.C:15b1   F0 0D      BEQ $15C0
+.C:15b3   A0 00      LDY #$00
+.C:15b5   B9 31 00   LDA $0031,Y
+.C:15b8   99 30 00   STA $0030,Y
+.C:15bb   C8         INY
+.C:15bc   C4 38      CPY $38
+.C:15be   90 F5      BCC $15B5
+.C:15c0   68         PLA
+.C:15c1   C9 00      CMP #$00
+.C:15c3   60         RTS
 
 
 ;; code which seems to read block from disk. Triggered from example
@@ -628,6 +651,8 @@ $13
 $14
 $15
 $1E
+$30-$37  : keys pressed?
+$38      ; counter related above key buffer?
 $58,$59 ; 
 $5F   ; disk drive to access: 1=drive 8, 2=drive9
 $60
