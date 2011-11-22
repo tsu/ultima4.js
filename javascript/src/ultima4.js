@@ -271,8 +271,10 @@ ultima4.main = (function() {
   function createRepl() {
     var maxLines = 11;
     var lines = new Array();
-    var prompt = String.fromCharCode(30);
-    var cursor = String.fromCharCode(125);
+    var promptCode = 30;
+    var cursorCode = 125;
+    var prompt = String.fromCharCode(promptCode);
+    var cursor = String.fromCharCode(cursorCode);
 
     function pushText(s) {
       lines.push(s);
@@ -286,12 +288,19 @@ ultima4.main = (function() {
     }
 
     function drawPrompt(g) {
-      drawText(g, prompt+cursor, palette[1], palette[0], 24*16, (12+lines.length)*16);
+      drawChar(g, promptCode, palette[14], palette[0], 24*16, (12+lines.length)*16);
+      drawChar(g, cursorCode, palette[1], palette[0], 25*16, (12+lines.length)*16);
     }
 
     function draw(g) {
       for (var i=0; i<lines.length; i++) {
-        drawText(g, lines[i], palette[1], palette[0], 24*16, (12+i)*16);
+        var s = lines[i];
+        if(s.charCodeAt(0) == promptCode) {
+          drawChar(g, promptCode, palette[14], palette[0], 24*16, (12+i)*16);
+          drawText(g, s.substr(1), palette[1], palette[0], 25*16, (12+i)*16);
+        } else {
+          drawText(g, s, palette[1], palette[0], 24*16, (12+i)*16);
+        }
       }
       drawPrompt(g);
     }
