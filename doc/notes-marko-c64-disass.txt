@@ -1,3 +1,30 @@
+
+;; Insert "T" into keyboard buffer in VICE monitor
+;; > c6 1       ; set length to 1
+;; > 277 54     ; #$54 is ascii code for T
+--- 157E Read keyboard
+.C:157e   A5 C6      LDA $C6       ; length of keyboard buffer
+.C:1580   08         PHP
+.C:1581   AD 77 02   LDA $0277     ; keyboard buffer
+.C:1584   09 80      ORA #$80
+.C:1586   28         PLP
+.C:1587   F0 17      BEQ $15A0
+.C:1589   C9 A0      CMP #$A0
+.C:158b   D0 04      BNE $1591
+.C:158d   A0 00      LDY #$00
+.C:158f   84 38      STY $38
+.C:1591   EA         NOP
+.C:1592   A4 38      LDY $38
+.C:1594   C0 08      CPY #$08
+.C:1596   B0 08      BCS $15A0
+.C:1598   99 30 00   STA $0030,Y
+.C:159b   E6 38      INC $38
+.C:159d   20 A1 15   JSR $15A1
+.C:15a0   60         RTS
+
+
+
+
 ;; code which seems to read block from disk. Triggered from example
 ;; on world map scrolling
 --- A52F Read/write block from/to disk
