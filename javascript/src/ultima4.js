@@ -202,42 +202,59 @@ ultima4.main = (function() {
     drawText(g, String.fromCharCode(30)+String.fromCharCode(125), palette[1], palette[0], 24*16, 15*16);
   }
 
-  function canMoveTo(mapX, mapY) {
-    var ret = true;
-    var tile = getMapTileAt(mapX, mapY);
-    switch(tile) {
-    case tileType.ocean:
-    case tileType.river:
-    case tileType.mountain:
-      ret = false;
+  function mutateNorth(state) {
+    return { x: state.x, y: state.y - 1 };
+  }
+
+  function mutateEast(state) {
+    return { x: state.x + 1, y: state.y };
+  }
+
+  function mutateSouth(state) {
+    return { x: state.x, y: state.y + 1 };
+  }
+
+  function mutateWest(state) {
+    return { x: state.x - 1, y: state.y };
+  }
+
+  function moveCommand(mutator) {
+    return function() {
+      var newState = mutator(state);
+      if (canMoveTo(newState.x, newState.y)) {
+        state.x = newState.x;
+        state.y = newState.y;
+      }
+    };
+
+    function canMoveTo(mapX, mapY) {
+      var ret = true;
+      var tile = getMapTileAt(mapX, mapY);
+      switch(tile) {
+      case tileType.ocean:
+      case tileType.river:
+      case tileType.mountain:
+        ret = false;
+      }
+      return ret;
     }
-    return ret;
+  }
+
+  function createCommandMap() {
+    var map = {};
+    map[keys.up] = moveCommand(mutateNorth);
+    map[keys.right] = moveCommand(mutateEast);
+    map[keys.down] = moveCommand(mutateSouth);
+    map[keys.left] = moveCommand(mutateWest);
+    return map;
   }
 
   function keyDown(e) {
-    switch(e.keyCode) {
-    case dir.up:
-      if (canMoveTo(state.x, state.y - 1)) {
-        state.y--;
-      }
-      break;
-    case dir.left:
-      if (canMoveTo(state.x - 1, state.y)) {
-        state.x--;
-      }
-      break;
-    case dir.down:
-      if (canMoveTo(state.x, state.y + 1)) {
-        state.y++;
-      }
-      break;
-    case dir.right:
-      if (canMoveTo(state.x + 1, state.y)) {
-        state.x++;
-      }
-      break;
+    var command = commands[e.keyCode];
+    if (command) {
+      command();
+      repaint();
     }
-    repaint();
   }
 
   function createCanvas() {
@@ -258,7 +275,7 @@ ultima4.main = (function() {
     repaint();
   }
 
-  var dir = {
+  var keys = {
     up: 38,
     left: 37,
     down: 40,
@@ -290,6 +307,7 @@ ultima4.main = (function() {
   var map = ultima4.gameData.worldMap;
   var tiles = createTiles();
   var canvas = createCanvas();
+  var commands = createCommandMap();
 
   document.write("<body>");
   document.onkeydown = keyDown;
