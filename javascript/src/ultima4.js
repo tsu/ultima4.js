@@ -87,7 +87,7 @@ ultima4.main = (function() {
     }
 
     function blocksView(tile) {
-      return tile == tileType.mountain || tile == tileType.forrest;
+      return tile == tileType.mountain || tile == tileType.forest;
     }
 
     function numberOfSightBlockersOnLine(x0, y0, x1, y1) {
@@ -236,6 +236,8 @@ ultima4.main = (function() {
       case tileType.ocean:
       case tileType.river:
       case tileType.mountain:
+      case tileType.LBCastleLeft:
+      case tileType.LBCastleRight:
         ret = false;
       }
       return ret;
@@ -328,9 +330,11 @@ ultima4.main = (function() {
     river: 2,
     grass: 4,
     bushes: 5,
-    forrest: 6,
+    forest: 6,
     hill: 7,
     mountain: 8,
+    LBCastleLeft: 13,
+    LBCastleRight: 15,
     empty: 69
   };
 
