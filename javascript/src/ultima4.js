@@ -9,12 +9,12 @@ ultima4.gameData = (function() {
 
   function rleDecode(data) {
     var buf = "";
-    for (i=0; i<data.length; i++) {
-      c = data.charCodeAt(i);
+    for (var i=0; i<data.length; i++) {
+      var c = data.charCodeAt(i);
       if (c >= 128) {
-        code = c & 7;
-        n = (c>>3) & 15;
-        for (j=0; j<n; j++)
+        var code = c & 7;
+        var n = (c>>3) & 15;
+        for (var j=0; j<n; j++)
           buf += String.fromCharCode(code);
       } else {
         buf += String.fromCharCode(c);
@@ -37,9 +37,9 @@ ultima4.main = (function() {
 
   function drawChar(g, c, fgColor, bgColor, x, y) {
     if(c>=0 && c<=127) {
-      for (row=0; row<8; row++) {
+      for (var row=0; row<8; row++) {
         var b =  parseInt(ultima4.gameData.font.substr(c*8*2 + row*2, 2), 16);
-        for (i=7; i>=0; i--) {
+        for (var i=7; i>=0; i--) {
           g.fillStyle = (b & (1<<i)) ? fgColor : bgColor;
           g.fillRect(x+8*2-(i+1)*2, y+row*2, 2, 2);
         }        
