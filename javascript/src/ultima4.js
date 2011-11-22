@@ -197,9 +197,7 @@ ultima4.main = (function() {
     drawText(g, "2-MKA      125G", palette[1], palette[0], 24*16, 2*16);
     drawText(g, "F:0200   G:0200", palette[1], palette[0], 24*16, 10*16);
     drawText(g, "WIND SOUTH", palette[1], palette[0], 7*16, 23*16);
-    drawText(g,"Welcome to", palette[1], palette[0], 24*16, 12*16);
-    drawText(g,"Ultima IV", palette[1], palette[0], 24*16, 13*16);
-    drawText(g, String.fromCharCode(30)+String.fromCharCode(125), palette[1], palette[0], 24*16, 15*16);
+    repl.draw(g);
   }
 
   function mutateNorth(state) {
@@ -218,12 +216,15 @@ ultima4.main = (function() {
     return { x: state.x - 1, y: state.y };
   }
 
-  function moveCommand(mutator) {
+  function moveCommand(mutator, displayName) {
     return function() {
+      repl.pushCommand(displayName);
       var newState = mutator(state);
       if (canMoveTo(newState.x, newState.y)) {
         state.x = newState.x;
         state.y = newState.y;
+      } else {
+        repl.pushText("Blocked!");
       }
     };
 
@@ -242,10 +243,10 @@ ultima4.main = (function() {
 
   function createCommandMap() {
     var map = {};
-    map[keys.up] = moveCommand(mutateNorth);
-    map[keys.right] = moveCommand(mutateEast);
-    map[keys.down] = moveCommand(mutateSouth);
-    map[keys.left] = moveCommand(mutateWest);
+    map[keys.up] = moveCommand(mutateNorth, "North");
+    map[keys.right] = moveCommand(mutateEast, "East");
+    map[keys.down] = moveCommand(mutateSouth, "South");
+    map[keys.left] = moveCommand(mutateWest, "West");
     return map;
   }
 
@@ -264,6 +265,41 @@ ultima4.main = (function() {
     return canvas;
   }
 
+  function createRepl() {
+    var maxLines = 11;
+    var lines = new Array();
+    var prompt = String.fromCharCode(30);
+    var cursor = String.fromCharCode(125);
+
+    function pushText(s) {
+      lines.push(s);
+      if (lines.length > maxLines) {
+        lines.shift();
+      }
+    }
+
+    function pushCommand(s) {
+      pushText(prompt+s);
+    }
+
+    function drawPrompt(g) {
+      drawText(g, prompt+cursor, palette[1], palette[0], 24*16, (12+lines.length)*16);
+    }
+
+    function draw(g) {
+      for (var i=0; i<lines.length; i++) {
+        drawText(g, lines[i], palette[1], palette[0], 24*16, (12+i)*16);
+      }
+      drawPrompt(g);
+    }
+
+    return {
+      pushText: pushText,
+      pushCommand: pushCommand,
+      draw: draw
+    };
+  }
+
   function createTiles() {
     var tiles = new Image();
     tiles.src = ultima4.gameData.tiles;
@@ -272,6 +308,9 @@ ultima4.main = (function() {
   }
 
   function onFinishedLoading() {
+    repl.pushText("Welcome to");
+    repl.pushText("Ultima IV");
+    repl.pushText("");
     repaint();
   }
 
@@ -304,6 +343,7 @@ ultima4.main = (function() {
 		 "#B84104", "#6A3304", "#FE4A57", "#424540",
 		 "#70746F", "#59FE59", "#5F53FE", "#A4A7A2"];
 
+  var repl = createRepl();
   var map = ultima4.gameData.worldMap;
   var tiles = createTiles();
   var canvas = createCanvas();
