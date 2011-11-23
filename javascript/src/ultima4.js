@@ -87,7 +87,7 @@ ultima4.main = (function() {
     }
 
     function blocksView(tile) {
-      return tile == tileType.mountain || tile == tileType.forest;
+      return [tileType.mountain, tileType.forest].indexOf(tile) != -1;
     }
 
     function numberOfSightBlockersOnLine(x0, y0, x1, y1) {
@@ -230,17 +230,9 @@ ultima4.main = (function() {
     };
 
     function canMoveTo(mapX, mapY) {
-      var ret = true;
       var tile = getMapTileAt(mapX, mapY);
-      switch(tile) {
-      case tileType.ocean:
-      case tileType.river:
-      case tileType.mountain:
-      case tileType.LBCastleLeft:
-      case tileType.LBCastleRight:
-        ret = false;
-      }
-      return ret;
+      var blockingTiles = [tileType.ocean, tileType.river, tileType.mountain, tileType.LBCastleLeft, tileType.LBCastleRight];
+      return blockingTiles.indexOf(tile) == -1;
     }
   }
 
