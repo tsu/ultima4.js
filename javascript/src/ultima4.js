@@ -48,17 +48,13 @@ ultima4.main = (function() {
   }
 
   function drawText(g, s, fgColor, bgColor, x, y) {
-    for (var i=0; i<s.length; i++) {
+    for (var i=0; i<s.length; i++) 
       drawChar(g, s.charCodeAt(i), fgColor, bgColor, x+i*8*2, y);
-    }
   }
 
   function drawCharLine(g, c, fgColor, bgColor, x, y, dx, dy, n) {
-    for(var i=0; i<n; i++) {
+    for(var i=0; i<n; i++, x+=dx, y+=dy) 
       drawChar(g, c, fgColor, bgColor, x, y);
-      x += dx;
-      y += dy;
-    }
   }
 
   function drawTile(g, tile, x, y) {
