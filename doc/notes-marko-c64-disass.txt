@@ -10,57 +10,175 @@
 >C:4200  cf ce cc d9  a1 8d 00 4c  1e 62 bb 46  69 47 3a 48   .......L.b.FiG:H
 
 $ ./extract-bytes ../data/c64-memdump-u4-worldmap.dat 16848 64  | ./u4mf-to-ascii.lisp | xxd -g1
-0000000: 44 49 53 41 42 4c 45 44 21 0d 00 4c 1e 62 20 21  DISABLED!..L.b !
-0000010: 08 42 4c 4f 43 4b 45 44 21 0d 00 29 01 20 54 08  .BLOCKED!..). T.
-0000020: 29 00 05 38 4c 1e 62 20 21 08 44 52 49 46 54 20  )..8L.b !.DRIFT 
-0000030: 4f 4e 4c 59 21 0d 00 4c 1e 62 3b 46 69 47 3a 48  ONLY!..L.b;FiG:H
+0000000: 44 49 53 41  42 4c 45 44  21 0d 00 4c  1e 62 20 21  DISABLED!..L.b !
+0000010: 08 42 4c 4f  43 4b 45 44  21 0d 00 29  01 20 54 08  .BLOCKED!..). T.
+0000020: 29 00 05 38  4c 1e 62 20  21 08 44 52  49 46 54 20  )..8L.b !.DRIFT 
+0000030: 4f 4e 4c 59  21 0d 00 4c  1e 62 3b 46  69 47 3a 48  ONLY!..L.b;FiG:H
 
 (C:$4214) d 41db
 .C:41db   4C 1E 62   JMP $621E
-.C:41de   20 21 08   JSR $0821
+.C:41de   20 21 08   JSR $0821      ; <-- jump point for "BLOCKED"?
 
-(C:$4210) fd 41eb
-.C:41eb   A9 01      LDA #$01
+(C:$4210) d 41eb
+.C:41eb   A9 01      LDA #$01       ; break here activated on "BLOCKED"
 .C:41ed   20 54 08   JSR $0854
 .C:41f0   A9 00      LDA #$00
 .C:41f2   85 38      STA $38
 .C:41f4   4C 1E 62   JMP $621E
 .C:41f7   20 21 08   JSR $0821
 
-;; command/text handlers?
-(C:$4206) h 0000 ffff  4c 1e 62 20 21 08
-4103
-410f
-4121
-4136
-4161
-4186
-4194
-41b4
-41ca
-41db
-41f4
-4f42
-4fa3
-5128
-5163
-5300
-54a0
-5501
-552d
-560b
-56c9
-57be
-59cb
-5af1
-5b1f
-5b4b
-5c6b
-5c96
-5ca6
+(C:$0ebb) g 41de                  ; Display "BLOCKED" !
 
+;; Hunt: JMP $41DE, jump for "BLOCKED"
+(C:$105b) h 0 ffff 4c de 41
+4295
+42be
+4300
+433d
+43ad
+43cc
+4477
+4496
+4540
+456e
+7857
+ab95
+abbe
+
+;; Hunt for: JSR $0821
+(C:$1495) h 0 ffff 20 21 08
+4038   ; "NO ACTIVE GAME!" & infinite loop
+4089   ; cursor
+40f7   ; cursor & "Zzzzz", breaks up
+4106   ; "Pass"
+4112   ; "WHAT?"
+4124   ; "NOT A PLAYER!"
+4139   ; "ONLY ON FOOT!"
+414e   ; "NOTHING THERE!"
+4164   ; "SLOW PROGRESS!", sometimes reset-break
+4178   ; "NOT HERE!"
+4189   ; cursor
+4197   ; "ABORTED!"
+41aa   ; "DONE."
+41b7   ; "YOU HAVE NONE!"
+41cd   ; "DISABLED!"
+41de   ; "BLOCKED!"
+41f7   ; "DRIFT ONLY", breaks
+42ed   ; "Advance"
+432a   ; "Retreat"
+4406   ; "left"? JAM
+44ce   ; JAM
+459f   ; "Turn" (wait input) "South"
+45a9   ; "Sail" (wait input) "North"
+4612   ; "LEAVING..."
+46bb   ; "ATTACK-" (wait input) "North"
+476f   ; "BOARD <-CAN'T!"
+4788   ; "Board what?"
+47b3
+47df
+47f8
+483a
+486c
+489b
+48c6
+493e
+49d7
+... cont ...
+
+(C:$8356) h 0000 ffff d7 e5 f3 f4    ; "West"
+7821
+8326
+(C:$8356) h 0000 ffff c5 e1 f3 f4    ; "East"
+7807
+831c
 
 - - - - - - - - - - - - -
+
+--- 621E Called on every command
+.C:621e   20 A8 83   JSR $83A8
+.C:6221   A5 1B      LDA $1B
+.C:6223   10 03      BPL $6228
+.C:6225   4C 33 71   JMP $7133
+.C:6228   A5 2B      LDA $2B
+.C:622a   C9 50      CMP #$50
+.C:622c   B0 10      BCS $623E
+.C:622e   20 4E 08   JSR $084E
+.C:6231   29 03      AND #$03
+.C:6233   D0 09      BNE $623E
+.C:6235   A5 2B      LDA $2B
+.C:6237   F8         SED
+.C:6238   18         CLC
+.C:6239   69 01      ADC #$01
+.C:623b   D8         CLD
+.C:623c   85 2B      STA $2B
+.C:623e   A5 1F      LDA $1F
+.C:6240   85 54      STA $54
+.C:6242   20 2D 08   JSR $082D
+.C:6245   A0 12      LDY #$12
+.C:6247   B1 7E      LDA ($7E),Y
+.C:6249   C9 D3      CMP #$D3    ; plr status S ?
+.C:624b   D0 0E      BNE $625B
+.C:624d   20 4E 08   JSR $084E
+.C:6250   29 07      AND #$07
+.C:6252   D0 1B      BNE $626F
+.C:6254   A9 C7      LDA #$C7     ; set plr status to G(ood)
+.C:6256   91 7E      STA ($7E),Y
+.C:6258   4C 6F 62   JMP $626F
+.C:625b   C9 D0      CMP #$D0     ; plr status Poison?
+.C:625d   D0 10      BNE $626F
+.C:625f   A9 02      LDA #$02
+.C:6261   20 B0 84   JSR $84B0
+.C:6264   20 EF 83   JSR $83EF
+.C:6267   A9 06      LDA #$06
+.C:6269   20 54 08   JSR $0854
+.C:626c   20 EF 83   JSR $83EF
+.C:626f   C6 54      DEC $54
+.C:6271   D0 CF      BNE $6242
+.C:6273   A5 1F      LDA $1F
+.C:6275   20 00 65   JSR $6500
+.C:6278   B0 03      BCS $627D
+.C:627a   20 1E 64   JSR $641E
+.C:627d   20 4D 64   JSR $644D
+.C:6280   A5 74      LDA $74
+.C:6282   30 0C      BMI $6290
+.C:6284   20 B7 6A   JSR $6AB7
+.C:6287   20 30 65   JSR $6530
+.C:628a   20 7C 66   JSR $667C
+.C:628d   20 B7 6A   JSR $6AB7
+.C:6290   A5 1B      LDA $1B
+.C:6292   C9 03      CMP #$03
+.C:6294   D0 11      BNE $62A7
+.C:6296   20 72 08   JSR $0872
+.C:6299   20 F2 6C   JSR $6CF2
+.C:629c   A5 48      LDA $48
+.C:629e   29 F0      AND #$F0
+.C:62a0   C9 D0      CMP #$D0
+.C:62a2   D0 03      BNE $62A7
+.C:62a4   4C 7F 6D   JMP $6D7F
+.C:62a7   A5 21      LDA $21
+.C:62a9   F0 02      BEQ $62AD
+.C:62ab   C6 21      DEC $21
+.C:62ad   4C 86 6C   JMP $6C86
+.C:62b0   A5 1B      LDA $1B
+.C:62b2   C9 01      CMP #$01
+.C:62b4   D0 34      BNE $62EA
+.C:62b6   A5 48      LDA $48
+.C:62b8   C9 17      CMP #$17
+.C:62ba   D0 2E      BNE $62EA
+.C:62bc   20 4E 08   JSR $084E
+.C:62bf   29 07      AND #$07
+.C:62c1   D0 27      BNE $62EA
+.C:62c3   20 21 08   JSR $0821    ; End?
+--
+.C:62c6   8D C2 D2   STA $D2C2    ; Garbled data?
+.C:62c9   C9 C4      CMP #$C4
+.C:62cb   C7 C5      DCP $C5
+.C:62cd   A0 D4      LDY #$D4
+.C:62cf   D2         JAM
+
+
+
+
 
 ;; Insert "T" into keyboard buffer in VICE monitor
 ;; > c6 1       ; set length to 1
