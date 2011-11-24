@@ -27,6 +27,39 @@ $ ./extract-bytes ../data/c64-memdump-u4-worldmap.dat 16848 64  | ./u4mf-to-asci
 .C:41f4   4C 1E 62   JMP $621E
 .C:41f7   20 21 08   JSR $0821
 
+;; command/text handlers?
+(C:$4206) h 0000 ffff  4c 1e 62 20 21 08
+4103
+410f
+4121
+4136
+4161
+4186
+4194
+41b4
+41ca
+41db
+41f4
+4f42
+4fa3
+5128
+5163
+5300
+54a0
+5501
+552d
+560b
+56c9
+57be
+59cb
+5af1
+5b1f
+5b4b
+5c6b
+5c96
+5ca6
+
+
 - - - - - - - - - - - - -
 
 ;; Insert "T" into keyboard buffer in VICE monitor
