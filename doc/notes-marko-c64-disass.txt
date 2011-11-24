@@ -15,6 +15,9 @@ $ ./extract-bytes ../data/c64-memdump-u4-worldmap.dat 16848 64  | ./u4mf-to-asci
 0000020: 29 00 05 38 4c 1e 62 20 21 08 44 52 49 46 54 20  )..8L.b !.DRIFT 
 0000030: 4f 4e 4c 59 21 0d 00 4c 1e 62 3b 46 69 47 3a 48  ONLY!..L.b;FiG:H
 
+(C:$4214) d 41db
+.C:41db   4C 1E 62   JMP $621E
+.C:41de   20 21 08   JSR $0821
 
 (C:$4210) fd 41eb
 .C:41eb   A9 01      LDA #$01
@@ -23,22 +26,6 @@ $ ./extract-bytes ../data/c64-memdump-u4-worldmap.dat 16848 64  | ./u4mf-to-asci
 .C:41f2   85 38      STA $38
 .C:41f4   4C 1E 62   JMP $621E
 .C:41f7   20 21 08   JSR $0821
-
-(C:$4214) d 41db
-.C:41db   4C 1E 62   JMP $621E
-.C:41de   20 21 08   JSR $0821
-.C:41e1   C2 CC      NOOP #$CC
-.C:41e3   CF C3 CB   DCP $CBC3
-.C:41e6   C5 C4      CMP $C4
-.C:41e8   A1 8D      LDA ($8D,X)
-.C:41ea   00         BRK
-.C:41eb   A9 01      LDA #$01
-.C:41ed   20 54 08   JSR $0854
-.C:41f0   A9 00      LDA #$00
-.C:41f2   85 38      STA $38
-.C:41f4   4C 1E 62   JMP $621E
-.C:41f7   20 21 08   JSR $0821
-
 
 - - - - - - - - - - - - -
 
