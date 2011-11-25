@@ -83,6 +83,10 @@ abbe
 48c6
 493e
 49d7
+4fd0   ; "Enter"   g 4fd0, actually executes enter town command
+....
+77ce   ; "North" & breaks if not blocked
+7804   ; "East"    g 7804, actually executes move east cmd, if blocked
 ... cont ...
 
 (C:$8356) h 0000 ffff d7 e5 f3 f4    ; "West"
