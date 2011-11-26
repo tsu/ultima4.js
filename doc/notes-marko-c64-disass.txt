@@ -1,3 +1,65 @@
+Koodi joka lkaa $4000 komennon valinta ja hyppy 4100+ rutiineihin?
+
+.C:40d1   A5 6A      LDA $6A
+.C:40d3   C9 08      CMP #$08
+.C:40d5   90 F0      BCC $40C7
+.C:40d7   20 F7 85   JSR $85F7
+.C:40da   4C 7B 40   JMP $407B
+.C:40dd   C9 C1      CMP #$C1
+.C:40df   90 31      BCC $4112
+.C:40e1   C9 DB      CMP #$DB
+.C:40e3   B0 2D      BCS $4112
+.C:40e5   38         SEC
+.C:40e6   E9 C1      SBC #$C1
+.C:40e8   0A         ASL A
+.C:40e9   A8         TAY
+.C:40ea   B9 0A 42   LDA $420A,Y    ; cmd-pointterin valinta?
+.C:40ed   85 7E      STA $7E
+.C:40ef   B9 0B 42   LDA $420B,Y
+.C:40f2   85 7F      STA $7F
+.C:40f4   6C 7E 00   JMP ($007E)    ; <-- hypp komentoon?
+.C:40f7   20 21 08   JSR $0821
+
+Key          Vector
+T)talk       59ce
+A)ttack      46bb
+H)old camp   54a3
+Z)ats        5ca9
+X)it         5bfd
+C)ast        483a
+V)olume      5b22
+B)oard       4769
+N)ew order   56cc
+M)ix reagent 56a1
+S)earch      59a9
+D)escend     4ef2
+F)ire        5243
+G)et chest   5303
+J)immy lock  5530
+K)limb       5568
+L)ocate pos  560e
+Q)uit & save 5814
+W)ear armour 5b4e
+E)nter       4fd0
+R)eady weapo 58bf
+T)alk        59ce
+Y)ell        5c6e
+U)se         5af4
+I)gnite torc 5504
+O)pen        5774
+P)eer        57c1
+
+
+- - -
+
+#5 (Break) .C:513b   A9 00      LDA #$00        ; map not read yet
+#6 (Break) .C:5140   20 21 08   JSR $0821       ; map not read yet
+#7 (Break) .C:514c   20 DA 51   JSR $51DA       ; map not read yet
+#8 (Break) .C:514f   20 F6 51   JSR $51F6       ; map not read yet
+#9 (Break) .C:5152   A9 0F      LDA #$0F        ; map is read into $8b00
+.C:514f   20 F6 51   JSR $51F6
+
+
 "BLOCKED" -> C2 CC CF C3 CB C5 C4
 
 (C:$41f0) h 0 ffff C2 CC CF C3 CB C5 C4
