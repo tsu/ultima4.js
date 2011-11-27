@@ -229,15 +229,15 @@ ultima4.main = (function() {
 
   function moveCommand(mutator, displayName) {
     return function() {
-      repl.pushCommand(displayName);
+      var s = displayName;
       var newState = mutator(state);
       if (canMoveTo(newState.x, newState.y, state.town)) {
         state.x = newState.x;
         state.y = newState.y;
       } else {
-        repl.pushText("BLOCKED!");
+        s += "\nBLOCKED!";
       }
-      repl.pushText("");
+      repl.pushCommand(s);
     };
 
     function canMoveTo(mapX, mapY, town) {
@@ -249,34 +249,33 @@ ultima4.main = (function() {
     }
   }
 
-  function enterCommand() {
+  function commandEnter() {
+    var s = "Enter ";
     if(state.town == null) {
       if(state.x==86 && state.y==107) {
         state.town = 0;
         state.x = 15;
         state.y = 30;
-        repl.pushCommand("Enter");
-        repl.pushText("");
-      }
-    }
+        s += "castle!";
+        s += "\n\n   BRITANNIA";
+      } else 
+        s += "WHAT?";
+    } else
+      s += "WHAT?";
+    repl.pushCommand(s);
   }
-
-  function createCommandMap() {
-    var map = {};
-    map[keys.up] = moveCommand(mutateNorth, "North");
-    map[keys.right] = moveCommand(mutateEast, "East");
-    map[keys.down] = moveCommand(mutateSouth, "South");
-    map[keys.left] = moveCommand(mutateWest, "West");
-    map[keys.E] = enterCommand;
-    return map;
+  
+  function commandOpen() {
+    repl.pushCommand("Open - not impl");
   }
 
   function keyDown(e) {
     var command = commands[e.keyCode];
     if (command) {
-      command();
-      repaint();
-    }
+      command();     
+    } else
+      repl.pushCommand("WHAT?");
+    repaint();
   }
 
   function createCanvas() {
@@ -288,21 +287,25 @@ ultima4.main = (function() {
 
   function createRepl() {
     var maxLines = 11;
+    var width = 15;
     var lines = new Array();
     var promptCode = 30;
     var cursorCode = 125;
     var prompt = String.fromCharCode(promptCode);
     var cursor = String.fromCharCode(cursorCode);
 
-    function pushText(s) {
-      lines.push(s);
-      if (lines.length > maxLines) {
-        lines.shift();
-      }
+    function pushText(str) {
+      str.split("\n").forEach(function(s) {
+        lines.push(s);
+        if (lines.length > maxLines) {
+          lines.shift();
+        }
+      });
     }
 
     function pushCommand(s) {
       pushText(prompt+s);
+      pushText("");
     }
 
     function drawPrompt(g) {
@@ -349,7 +352,8 @@ ultima4.main = (function() {
     left: 37,
     down: 40,
     right: 39,
-    E: "E".charCodeAt(0)
+    E: "E".charCodeAt(0),
+    O: "O".charCodeAt(0)
   };
 
   var tileType = {
@@ -390,7 +394,18 @@ ultima4.main = (function() {
   var tiles = createTiles();
   var townMaps = ultima4.gameData.townMaps;
   var canvas = createCanvas();
-  var commands = createCommandMap();
+  var commands = (function() {
+    var map = {};
+    map[keys.up] = moveCommand(mutateNorth, "North");
+    map[keys.right] = moveCommand(mutateEast, "East");
+    map[keys.down] = moveCommand(mutateSouth, "South");
+    map[keys.left] = moveCommand(mutateWest, "West");
+    map[keys.E] = commandEnter;
+    map[keys.O] = commandOpen;
+    return map;
+  }());
+
+
 
   document.write("<body>");
   document.onkeydown = keyDown;
