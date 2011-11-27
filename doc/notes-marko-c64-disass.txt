@@ -59,8 +59,12 @@ P)eer        57c1
 #9 (Break) .C:5152   A9 0F      LDA #$0F        ; map is read into $8b00
 .C:514f   20 F6 51   JSR $51F6
 
-
+"BRITA" -> C2 D2 C9 D4 C1
 "BLOCKED" -> C2 CC CF C3 CB C5 C4
+"PIRATE" -> D0 C9 D2 C1 D4 C5
+
+Town names stored back to back, without 0 bytes, but with cleat 7th
+bit as end of string marker?
 
 (C:$41f0) h 0 ffff C2 CC CF C3 CB C5 C4
 41e1
