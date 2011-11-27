@@ -34,6 +34,12 @@ ultima4.gameData = (function() {
 }());
 
 ultima4.main = (function() {
+  function getTileAt(x, y, town) {
+    return typeof town == "undefined" || town == null ? 
+      getMapTileAt(x, y) : 
+      getTownTileAt(x, y, town);      
+  }
+
   function getMapTileAt(x, y) {
     return map.charCodeAt(y*256+x);
   }
@@ -71,26 +77,20 @@ ultima4.main = (function() {
   }
 
   function drawViewport(g, mapX, mapY, town) {
-    if(typeof town == "undefined")
-      town = null;
     var ox = 16 + 5*32;
     var oy = 16 + 5*32;
     for (var y=-5; y<=5; y++) {
       for (var x=-5; x<=5; x++) {
-        var tile;
-        if(town == null)
-          tile = !isTileInLineOfSight(x, y) ? tileType.empty : getMapTileAt(mapX+x,mapY+y);
-        else
-          tile = getTownTileAt(mapX+x, mapY+y, town);
+        var  tile = !isTileInLineOfSight(x, y, town) ? tileType.empty : getTileAt(mapX+x,mapY+y,town);
         drawTile(g, tile, ox + x*32, oy + y*32);
       }
     }
 
     drawTile(g, 31, ox, oy);
 
-    function isTileInLineOfSight(x, y) {
-      var blockingTiles = numberOfSightBlockersOnLine(0, 0, x, y);
-      if (blocksView(getMapTileAt(mapX+x,mapY+y)) && blockingTiles <= 1) {
+    function isTileInLineOfSight(x, y, town) {
+      var blockingTiles = numberOfSightBlockersOnLine(0, 0, x, y, town);
+      if (blocksView(getTileAt(mapX+x,mapY+y,town)) && blockingTiles <= 1) {
         return true;
       } else {
         return blockingTiles == 0;
@@ -98,10 +98,10 @@ ultima4.main = (function() {
     }
 
     function blocksView(tile) {
-      return [tileType.mountain, tileType.forest].indexOf(tile) != -1;
+      return [tileType.mountain, tileType.forest, tileType.wall].indexOf(tile) != -1;
     }
 
-    function numberOfSightBlockersOnLine(x0, y0, x1, y1) {
+    function numberOfSightBlockersOnLine(x0, y0, x1, y1, town) {
       var origX1 = x1;
       var origY1 = y1;
       var steep = Math.abs(y1-y0) > Math.abs(x1-x0);
@@ -131,7 +131,7 @@ ultima4.main = (function() {
       var y = y0;
       var blockingTiles = 0;
       for (var x=x0; x<=x1; x++) {
-        var tile = steep ? getMapTileAt(mapX+y,mapY+x) : getMapTileAt(mapX+x,mapY+y);
+        var tile = steep ? getTileAt(mapX+y,mapY+x,town) : getTileAt(mapX+x,mapY+y,town);
         if (!(y == 0 && x == 0) && blocksView(tile)) {
           blockingTiles += 1;
         }
@@ -370,7 +370,8 @@ ultima4.main = (function() {
     LBCastleRight: 15,
     floorStone: 0x3e,
     floorWood: 0x3f,
-    empty: 69
+    empty: 69,
+    wall: 0x7f
   };
 
   var state = {
