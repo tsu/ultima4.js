@@ -231,7 +231,7 @@ ultima4.main = (function() {
     return function() {
       repl.pushCommand(displayName);
       var newState = mutator(state);
-      if (canMoveTo(newState.x, newState.y)) {
+      if (canMoveTo(newState.x, newState.y, state.town)) {
         state.x = newState.x;
         state.y = newState.y;
       } else {
@@ -240,10 +240,12 @@ ultima4.main = (function() {
       repl.pushText("");
     };
 
-    function canMoveTo(mapX, mapY) {
-      var tile = getMapTileAt(mapX, mapY);
-      var blockingTiles = [tileType.ocean, tileType.river, tileType.mountain, tileType.LBCastleLeft, tileType.LBCastleRight];
-      return blockingTiles.indexOf(tile) == -1;
+    function canMoveTo(mapX, mapY, town) {
+      if(typeof town == "undefined")
+        town = null;
+      var tile = town==null ? getMapTileAt(mapX, mapY) : getTownTileAt(mapX, mapY, town);
+      var tilesCanWalkOn = [tileType.grass, tileType.bushes, tileType.forest, tileType.hill, tileType.dungeon, tileType.town, tileType.castle, tileType.village, tileType.LBCastleCenter, tileType.floorStone, tileType.floorWood]
+      return tilesCanWalkOn.indexOf(tile) != -1;
     }
   }
 
@@ -359,8 +361,15 @@ ultima4.main = (function() {
     forest: 6,
     hill: 7,
     mountain: 8,
+    dungeon: 9,
+    town: 10,
+    castle: 11,
+    village: 12,
     LBCastleLeft: 13,
+    LBCastleCenter: 14,
     LBCastleRight: 15,
+    floorStone: 0x3e,
+    floorWood: 0x3f,
     empty: 69
   };
 
