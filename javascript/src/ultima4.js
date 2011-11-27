@@ -41,7 +41,7 @@ ultima4.main = (function() {
   }
 
   function getMapTileAt(x, y) {
-    return map.charCodeAt(y*256+x);
+    return worldMap.charCodeAt(y*256+x);
   }
 
   function getTownTileAt(x, y, town) {
@@ -208,7 +208,7 @@ ultima4.main = (function() {
     drawText(g, "2-MKA      125G", palette[1], palette[0], 24*16, 2*16);
     drawText(g, "F:0200   G:0200", palette[1], palette[0], 24*16, 10*16);
     drawText(g, "WIND SOUTH", palette[1], palette[0], 7*16, 23*16);
-    repl.draw(g);
+    console.draw(g);
   }
 
   function mutateNorth(state) {
@@ -237,7 +237,7 @@ ultima4.main = (function() {
       } else {
         s += "\nBLOCKED!";
       }
-      repl.pushCommand(s);
+      console.pushCommand(s);
     };
 
     function canMoveTo(mapX, mapY, town) {
@@ -249,6 +249,15 @@ ultima4.main = (function() {
     }
   }
 
+  function padStringCenter(s, len) {
+    if (typeof len == "undefined")
+      len = 15;
+    if(s.length < len)
+      for(var i=(len - s.length)/2; i>0; i--)
+        s = " " + s;
+    return s;
+  }
+
   function commandEnter() {
     var s = "Enter ";
     if(state.town == null) {
@@ -256,17 +265,16 @@ ultima4.main = (function() {
         state.town = 0;
         state.x = 15;
         state.y = 30;
-        s += "castle!";
-        s += "\n\n   BRITANNIA";
+        s += "castle!\n\n" + padStringCenter("BRITANNIA");
       } else 
         s += "WHAT?";
     } else
       s += "WHAT?";
-    repl.pushCommand(s);
+    console.pushCommand(s);
   }
   
   function commandOpen() {
-    repl.pushCommand("Open - not impl");
+    console.pushCommand("Open-");
   }
 
   function keyDown(e) {
@@ -274,7 +282,7 @@ ultima4.main = (function() {
     if (command) {
       command();     
     } else
-      repl.pushCommand("WHAT?");
+      console.pushCommand("WHAT?");
     repaint();
   }
 
@@ -285,7 +293,7 @@ ultima4.main = (function() {
     return canvas;
   }
 
-  function createRepl() {
+  function createConsole() {
     var maxLines = 11;
     var width = 15;
     var lines = new Array();
@@ -295,17 +303,14 @@ ultima4.main = (function() {
     var cursor = String.fromCharCode(cursorCode);
 
     function pushText(str) {
-      str.split("\n").forEach(function(s) {
-        lines.push(s);
-        if (lines.length > maxLines) {
+      str.split("\n").forEach(function(s) {        
+        if (lines.push(s) > maxLines) 
           lines.shift();
-        }
       });
     }
 
     function pushCommand(s) {
-      pushText(prompt+s);
-      pushText("");
+      pushText(prompt + s +"\n");
     }
 
     function drawPrompt(g) {
@@ -341,9 +346,9 @@ ultima4.main = (function() {
   }
 
   function onFinishedLoading() {
-    repl.pushText("Welcome to");
-    repl.pushText("Ultima IV");
-    repl.pushText("");
+    console.pushText("Welcome to");
+    console.pushText("Ultima IV");
+    console.pushText("");
     repaint();
   }
 
@@ -381,7 +386,8 @@ ultima4.main = (function() {
   var state = {
     x: 86,
     y: 108,
-    town: null
+    town: null,
+    readInput: null
   };
 
   var palette = ["#000000", "#FDFEFC", "#BE1A24", "#30E6C6",
@@ -389,8 +395,8 @@ ultima4.main = (function() {
 		 "#B84104", "#6A3304", "#FE4A57", "#424540",
 		 "#70746F", "#59FE59", "#5F53FE", "#A4A7A2"];
 
-  var repl = createRepl();
-  var map = ultima4.gameData.worldMap;
+  var console = createConsole();
+  var worldMap = ultima4.gameData.worldMap;
   var tiles = createTiles();
   var townMaps = ultima4.gameData.townMaps;
   var canvas = createCanvas();
