@@ -237,6 +237,12 @@ ultima4.main = (function() {
       } else {
         s += "\nBLOCKED!";
       }
+      if (state.town!=null && (state.x<0 || state.x>31 || state.y<0 || state.y>31)) {
+        state.x = state.worldX;
+        state.y = state.worldY
+        state.town = null;
+        s += "\nLEAVING...";
+      } 
       console.pushCommand(s);
     };
 
@@ -264,6 +270,8 @@ ultima4.main = (function() {
         switch (type) {
         case tileType.town:
           state.town = loc.id;
+          state.worldX = state.x;
+          state.worldY = state.y;
           state.x = 1;
           state.y = 15;
           s += "towne!";
@@ -271,6 +279,8 @@ ultima4.main = (function() {
         case tileType.castle:
         case tileType.LBCastleCenter:
           state.town = loc.id;
+          state.worldX = state.x;
+          state.worldY = state.y;
           state.x = 15;
           state.y = 30;
           s += "castle!";
@@ -461,7 +471,7 @@ ultima4.main = (function() {
     { id: 20, x: 156, y: 27, name: "COVETOUS" },
     { id: 21, x: 58, y: 102, name: "SHAME" },
     { id: 22, x: 239, y: 240, name: "HYLOTHE" },
-    { id: 23, x: 233, y: 233, name: "THE GREAT\tSTYGIAN ABYSS!" },
+    { id: 23, x: 233, y: 233, name: "THE GREAT\n\tSTYGIAN ABYSS!" },
     { id: 24, x: 233, y: 66, name: "HONESTY" },
     { id: 25, x: 128, y: 92, name: "COMPASSION" },
     { id: 26, x: 36, y: 229, name: "VALOR" },
