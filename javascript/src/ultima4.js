@@ -261,14 +261,16 @@ ultima4.main = (function() {
       var type = getTileAt(state.x, state.y, state.town);
       window.console.log("location: "+ loc);
       if(loc) {
-        state.town = loc.id;
         switch (type) {
         case tileType.town:
+          state.town = loc.id;
           state.x = 1;
           state.y = 15;
           s += "towne!";
           break;
+        case tileType.castle:
         case tileType.LBCastleCenter:
+          state.town = loc.id;
           state.x = 15;
           state.y = 30;
           s += "castle!";
@@ -362,7 +364,7 @@ ultima4.main = (function() {
   }
 
   function getLocation(x, y) {
-    var hit = locations.filter(function(p){ return p.location.x==x && p.location.y==y });
+    var hit = locations.filter(function(p){ return p.x==x && p.y==y });
     return hit ? hit[0] : null;
   }
 
@@ -406,6 +408,7 @@ ultima4.main = (function() {
   };
 
   var tilesCanWalkOn = [tileType.swamp, tileType.grass, tileType.bushes, tileType.forest, tileType.hill, tileType.dungeon, tileType.town, tileType.castle, tileType.village, tileType.LBCastleCenter, tileType.stoneFloor, tileType.woodenFloor, tileType.stoneBridge, tileType.woodenBridgeTop, tileType.woodenBridgeBottom, tileType.ruins, tileType.shrine];
+
   var state = {
     x: 86,
     y: 108,
@@ -433,21 +436,40 @@ ultima4.main = (function() {
     map[keys.O] = commandOpen;
     return map;
   }());
-
-
-  var locationNames = [
-    "BRITANNIA", "THE LYCAEUM", "EMPATH ABBEY", "SERPANTS HOLD",
-    "MOONGLOW", "BRITAIN", "JHELOM", "YEW", "MINOC",
-    "TRINSIC", "SKARA BRAE", "MAGINCIA", "PAWS",
-    "BUCCANEERS DEN", "VESPER", "COVE", 
-    "DECEIT", "DESPISE", "DASTERD", "WRONG",
-    "COVETOUS", "SHAME", "HYLOTHETHE", 
-    "GREAT\nSTYGIAN ABYSS!"];
   
   var locations = [
-    { id: 0, location: { x: 86, y: 107 }, name: "BRITANNIA" },
-    { id: 5, location: { x: 82, y: 106 }, name: "BRITAIN" }
-  ]
+    { id: 0, x: 86, y: 107, name: "BRITANNIA" },
+    { id: 1, x: 218, y: 107, name: "THE LYCAEUM" },
+    { id: 2, x: 28, y: 50, name: "EMPATH ABBEY" },
+    { id: 3, x: 146, y: 241, name: "SERPANTS HOLD" },
+    { id: 4, x: 232, y: 135, name: "MOONGLOW" },
+    { id: 5, x: 82, y: 106, name: "BRITAIN" },
+    { id: 6, x: 36, y: 222, name: "JHELOM" },
+    { id: 7, x: 58, y: 43, name: "YEW" },
+    { id: 8, x: 159, y: 20, name: "MINOC" },
+    { id: 9, x: 106, y: 184, name: "TRINSIC" },
+    { id: 10, x: 22, y: 128, name: "SKARA BRAE" },
+    { id: 11, x: 187, y: 169, name: "MAGINCIA" },
+    { id: 12, x: 98, y: 145, name: "PAWS" },
+    { id: 13, x: 136, y: 158, name: "BUCCANEERS DEN" },
+    { id: 14, x: 201, y: 59, name: "VESPER" },
+    { id: 15, x: 136, y: 90, name: "COVE" },
+    { id: 16, x: 240, y: 73, name: "DECEIT" },
+    { id: 17, x: 91, y: 67, name: "DESPISE" },
+    { id: 18, x: 72, y: 168, name: "DASTERD" },
+    { id: 19, x: 126, y: 20, name: "WRONG" },
+    { id: 20, x: 156, y: 27, name: "COVETOUS" },
+    { id: 21, x: 58, y: 102, name: "SHAME" },
+    { id: 22, x: 239, y: 240, name: "HYLOTHE" },
+    { id: 23, x: 233, y: 233, name: "THE GREAT\tSTYGIAN ABYSS!" },
+    { id: 24, x: 233, y: 66, name: "HONESTY" },
+    { id: 25, x: 128, y: 92, name: "COMPASSION" },
+    { id: 26, x: 36, y: 229, name: "VALOR" },
+    { id: 27, x: 73, y: 11, name: "JUSTICE" },
+    { id: 28, x: 205, y: 45, name: "SACRIFICE" },
+    { id: 29, x: 81, y: 207, name: "HONOR" },
+    { id: 30, x: 231, y: 216, name: "SPIRITUALITY" },
+    { id: 31, x: 231, y: 216, name: "HUMILITY" } ];
 
   document.write("<body>");
   document.onkeydown = keyDown;
