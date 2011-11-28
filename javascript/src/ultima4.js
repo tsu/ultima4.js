@@ -266,6 +266,11 @@ ultima4.main = (function() {
         state.x = 15;
         state.y = 30;
         s += "castle!\n\n" + padStringCenter("BRITANNIA");
+      } else if(state.x==82 && state.y==106) {
+        state.town = 5;
+        state.x = 1;
+        state.y = 15;
+        s += "towne!\n\n" + padStringCenter("BRITAIN");
       } else 
         s += "WHAT?";
     } else

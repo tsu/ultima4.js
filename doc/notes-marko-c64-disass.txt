@@ -1,3 +1,7 @@
+;; Towns
+05 BRITAIN
+11 MAGNICIA
+
 Koodi joka lkaa $4000 komennon valinta ja hyppy 4100+ rutiineihin?
 
 .C:40d1   A5 6A      LDA $6A
