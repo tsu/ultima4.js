@@ -259,19 +259,27 @@ ultima4.main = (function() {
   }
 
   function commandEnter() {
-    var s = "Enter ";
+    var s = "Enter ";    
     if(state.town == null) {
-      if(state.x==86 && state.y==107) {
-        state.town = 0;
-        state.x = 15;
-        state.y = 30;
-        s += "castle!\n\n" + padStringCenter("BRITANNIA");
-      } else if(state.x==82 && state.y==106) {
-        state.town = 5;
-        state.x = 1;
-        state.y = 15;
-        s += "towne!\n\n" + padStringCenter("BRITAIN");
-      } else 
+      var loc = getLocation(state.x, state.y);
+      var type = getTileAt(state.x, state.y, state.town);
+      window.console.log("location: "+ loc);
+      if(loc) {
+        state.town = loc.id;
+        switch (type) {
+        case tileType.town:
+          state.x = 1;
+          state.y = 15;
+          s += "towne!";
+          break;
+        case tileType.LBCastleCenter:
+          state.x = 15;
+          state.y = 30;
+          s += "castle!";
+          break;
+        }
+        s += "\n\n" + padStringCenter(loc.name);
+      } else
         s += "WHAT?";
     } else
       s += "WHAT?";
@@ -357,6 +365,11 @@ ultima4.main = (function() {
     repaint();
   }
 
+  function getLocation(x, y) {
+    var hit = locations.filter(function(p){ return p.location.x==x && p.location.y==y });
+    return hit ? hit[0] : null;
+  }
+
   var keys = {
     up: 38,
     left: 37,
@@ -417,6 +430,19 @@ ultima4.main = (function() {
   }());
 
 
+  var locationNames = [
+    "BRITANNIA", "THE LYCAEUM", "EMPATH ABBEY", "SERPANTS HOLD",
+    "MOONGLOW", "BRITAIN", "JHELOM", "YEW", "MINOC",
+    "TRINSIC", "SKARA BRAE", "MAGINCIA", "PAWS",
+    "BUCCANEERS DEN", "VESPER", "COVE", 
+    "DECEIT", "DESPISE", "DASTERD", "WRONG",
+    "COVETOUS", "SHAME", "HYLOTHETHE", 
+    "GREAT\nSTYGIAN ABYSS!"];
+  
+  var locations = [
+    { id: 0, location: { x: 86, y: 107 }, name: "BRITANNIA" },
+    { id: 5, location: { x: 82, y: 106 }, name: "BRITAIN" }
+  ]
 
   document.write("<body>");
   document.onkeydown = keyDown;

@@ -2,6 +2,9 @@
 05 BRITAIN
 11 MAGNICIA
 
+Town names in memory. Start 1eb6 (7862), end 1f79 (8057), len 196
+$ util/u4mf-to-ascii.lisp < data/c64-memdump-u4-worldmap.dat | xxd -s 7862 -l196 -g1 
+
 Koodi joka lkaa $4000 komennon valinta ja hyppy 4100+ rutiineihin?
 
 .C:40d1   A5 6A      LDA $6A
