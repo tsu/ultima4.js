@@ -154,9 +154,15 @@ ultima4.main = (function() {
   function repaint() {
     var time = new Date().getTime();
     var g = canvas.getContext("2d");
-    g.fillStyle = '#000';
-    g.fillRect(0, 0, canvas.width, canvas.height);
-    drawScreenFrames(g);
+    if (hints.clearScreen) {
+      g.fillStyle = '#000';
+      g.fillRect(0, 0, canvas.width, canvas.height);
+      hints.clearScreen = false;
+    }
+    if (hints.redrawScreenFrames) {
+      drawScreenFrames(g);
+      hints.redrawScreenFrames = false;
+    }
     drawViewport(g, state.x, state.y, state.town);
     drawText(g, "1-TSU      125G", palette[1], palette[0], 24*16, 1*16);
     drawText(g, "2-MKA      125G", palette[1], palette[0], 24*16, 2*16);
@@ -309,6 +315,8 @@ ultima4.main = (function() {
     }
 
     function draw(g) {
+      g.fillStyle = '#000';
+      g.fillRect(24*16, 12*16, width*16, maxLines*16);
       for (var i=0; i<lines.length; i++) {
         var s = lines[i];
         if(s.charCodeAt(0) == promptCode) {
@@ -478,6 +486,10 @@ ultima4.main = (function() {
     [6, 1, 24*16, 11*16, 16, 0, 15],
     [4, 1, 39*16, 11*16, 0, 0, 1]];
 
+  var hints = {
+    redrawScreenFrames: true,
+    clearScreen: true
+  };
 
   document.write("<body>");
   document.onkeydown = keyDown;
