@@ -146,56 +146,9 @@ ultima4.main = (function() {
   }
 
   function drawScreenFrames(g) {
-    drawTopRow();
-    drawLeftColumn();
-    drawBottomRow();
-    drawCenterColumn();
-    drawRightColumn();
-    drawRightSideHorizontalBars();
-
-    function drawTopRow() {
-      drawChar(g, 16, palette[14], palette[0], 0, 0);
-      drawCharLine(g, 4, palette[14], palette[1], 16, 0, 16, 0, 9);
-      drawChar(g, 30, palette[14], palette[0], 10*16, 0);
-      drawChar(g, 28, palette[14], palette[0], 13*16, 0);
-      drawCharLine(g, 4, palette[14], palette[1], 14*16, 0, 16, 0, 9);
-      drawChar(g, 0, palette[14], palette[0], 23*16, 0);
-      drawCharLine(g, 4, palette[14], palette[1], 24*16, 0, 16, 0, 15);
-      drawChar(g, 18, palette[14], palette[0], 39*16, 0);
-    }
-
-    function drawLeftColumn() {
-      drawCharLine(g, 10, palette[14], palette[1], 0, 16, 0, 16, 22);
-      drawChar(g, 20, palette[14], palette[0], 0, 23*16);
-    }
-
-    function drawBottomRow() {
-      drawCharLine(g, 2, palette[14], palette[1], 16, 23*16, 16, 0, 5);
-      drawChar(g, 30, palette[14], palette[0], 6*16, 23*16);
-      drawChar(g, 28, palette[14], palette[0], 17*16, 23*16);
-      drawCharLine(g, 2, palette[14], palette[1], 18*16, 23*16, 16, 0, 5);
-    }
-
-    function drawCenterColumn() {
-      drawCharLine(g, 12, palette[14], palette[1], 23*16, 16, 0, 16, 8);
-      drawChar(g, 8, palette[14], palette[1], 23*16, 9*16);
-      drawChar(g, 12, palette[14], palette[1], 23*16, 10*16);
-      drawChar(g, 8, palette[14], palette[1], 23*16, 11*16);
-      drawCharLine(g, 12, palette[14], palette[1], 23*16, 12*16, 0, 16, 11);
-      drawChar(g, 10, palette[14], palette[1], 23*16, 23*16);
-    }
-
-    function drawRightColumn() {
-      drawCharLine(g, 8, palette[14], palette[1], 39*16, 16, 0, 16, 8);
-      drawChar(g, 0, palette[14], palette[1], 39*16, 9*16);
-      drawChar(g, 8, palette[14], palette[1], 39*16, 10*16);
-    }
-
-    function drawRightSideHorizontalBars() {
-      drawCharLine(g, 6, palette[14], palette[1], 24*16, 9*16, 16, 0, 15);
-      drawCharLine(g, 6, palette[14], palette[1], 24*16, 11*16, 16, 0, 15);
-      drawChar(g, 4, palette[14], palette[1], 39*16, 11*16);
-    }
+    frameCharLines.forEach(function(l) {
+      drawCharLine(g, l[0], palette[14], palette[l[1]], l[2], l[3], l[4], l[5], l[6]); 
+    });
   }
 
   function repaint() {
@@ -493,6 +446,35 @@ ultima4.main = (function() {
     { id: 29, x: 81, y: 207, name: "HONOR" },
     { id: 30, x: 231, y: 216, name: "SPIRITUALITY" },
     { id: 31, x: 231, y: 216, name: "HUMILITY" } ];
+
+  var frameCharLines = [
+    [16, 0, 0, 0, 0, 0, 1],
+    [4, 1, 16, 0, 16, 0, 9],
+    [30, 0, 10*16, 0, 0, 0, 1],
+    [28, 0, 13*16, 0, 0, 0, 1],
+    [4, 1, 14*16, 0, 16, 0, 9],
+    [0, 0, 23*16, 0, 0, 0, 1],
+    [4, 1, 24*16, 0, 16, 0, 15],
+    [18, 0, 39*16, 0, 0, 0, 1],
+    [10, 1, 0, 16, 0, 16, 22],
+    [20, 0, 0, 23*16, 0, 0, 1],
+    [2, 1, 16, 23*16, 16, 0, 5],
+    [30, 0, 6*16, 23*16, 0, 0, 1],
+    [28, 0, 17*16, 23*16, 0, 0, 1],
+    [2, 1, 18*16, 23*16, 16, 0, 5],
+    [12, 1, 23*16, 16, 0, 16, 8],
+    [8, 1, 23*16, 9*16, 0, 0, 1],
+    [12, 1, 23*16, 10*16, 0, 0, 1],
+    [8, 1, 23*16, 11*16, 0, 0, 1],
+    [12, 1, 23*16, 12*16, 0, 16, 11],
+    [10, 1, 23*16, 23*16, 0, 0, 1],
+    [8, 1, 39*16, 16, 0, 16, 8],
+    [0, 1, 39*16, 9*16, 0, 0, 1],
+    [8, 1, 39*16, 10*16, 0, 0, 1],
+    [6, 1, 24*16, 9*16, 16, 0, 15],
+    [6, 1, 24*16, 11*16, 16, 0, 15],
+    [4, 1, 39*16, 11*16, 0, 0, 1]];
+
 
   document.write("<body>");
   document.onkeydown = keyDown;
