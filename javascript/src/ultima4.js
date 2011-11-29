@@ -265,16 +265,30 @@ ultima4.main = (function() {
     if(state.town == null) {
       var loc = getLocation(state.x, state.y);
       var type = getTileAt(state.x, state.y, state.town);
-      window.console.log("location: "+ loc);
       if(loc) {
         switch (type) {
+        case tileType.shrine:
+          s += "the\nshrine of\n"+ loc.name;
+          s += "\n\nTHOU DOST NOT\nBEAR THE RUNE\nOF ENTRY! A\nSTRANGE FORCE\nKEEPS YOU OUT!\n"
+          break;
+        case tileType.dungeon:
+          s += "dungeon!\n\n" + padStringCenter(loc.name);
+          break;
+        case tileType.village:          
+          state.town = loc.id;
+          state.worldX = state.x;
+          state.worldY = state.y;
+          state.x = 1;
+          state.y = 15;
+          s += "village!\n\n" + padStringCenter(loc.name);
+          break;
         case tileType.town:
           state.town = loc.id;
           state.worldX = state.x;
           state.worldY = state.y;
           state.x = 1;
           state.y = 15;
-          s += "towne!";
+          s += "towne!\n\n" + padStringCenter(loc.name);
           break;
         case tileType.castle:
         case tileType.LBCastleCenter:
@@ -283,10 +297,9 @@ ultima4.main = (function() {
           state.worldY = state.y;
           state.x = 15;
           state.y = 30;
-          s += "castle!";
+          s += "castle!\n\n" + padStringCenter(loc.name);
           break;
         }
-        s += "\n\n" + padStringCenter(loc.name);
       } else
         s += "WHAT?";
     } else
