@@ -152,6 +152,7 @@ ultima4.main = (function() {
   }
 
   function repaint() {
+    var time = new Date().getTime();
     var g = canvas.getContext("2d");
     g.fillStyle = '#000';
     g.fillRect(0, 0, canvas.width, canvas.height);
@@ -162,6 +163,8 @@ ultima4.main = (function() {
     drawText(g, "F:0200   G:0200", palette[1], palette[0], 24*16, 10*16);
     drawText(g, "WIND SOUTH", palette[1], palette[0], 7*16, 23*16);
     console.draw(g);
+    time = new Date().getTime() - time;
+    window.console.log("frame time: "+ time +" ms");
   }
 
   function mutateNorth(state) {
