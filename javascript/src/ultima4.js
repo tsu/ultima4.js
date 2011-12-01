@@ -183,8 +183,31 @@ ultima4.main = (function() {
     });
   }
 
-  function repaint() {
+  function update() {
     var time = new Date().getTime();
+    var wasWork = false;
+    if(key) {
+      window.console.log("update(): frame: "+ frame + ", key: "+ key);
+      var command = commands[key];
+      if (command) {
+        command();     
+      } else {
+        console.write("WHAT?\n\n");
+        console.writePrompt();
+      }
+      key = null;
+      repaint();
+      wasWork = true;
+    } else
+      console.drawCursor(canvas.getContext("2d"));
+    frame++;
+    time = new Date().getTime() - time;
+    if (wasWork)
+      window.console.log("frame time: "+ time +" ms");
+    setTimeout(update, 200);
+  }
+
+  function repaint() {
     var g = canvas.getContext("2d");
     if (hints.clearScreen) {
       g.fillStyle = '#000';
@@ -201,8 +224,6 @@ ultima4.main = (function() {
     drawText(g, "F:0200   G:0200", palette[1], palette[0], 24*16, 10*16);
     drawText(g, "WIND SOUTH", palette[1], palette[0], 7*16, 23*16);
     console.draw(g);
-    time = new Date().getTime() - time;
-    window.console.log("frame time: "+ time +" ms");
   }
 
   function mutateNorth(state) {
@@ -308,14 +329,7 @@ ultima4.main = (function() {
   }
 
   function keyDown(e) {
-    var command = commands[e.keyCode];
-    if (command) {
-      command();     
-    } else {
-      console.write("WHAT?\n\n");
-      console.writePrompt();
-    }
-    repaint();
+    key = e.keyCode;
   }
 
   function createCanvas() {
@@ -330,7 +344,7 @@ ultima4.main = (function() {
     var width = 15;
     var lines = [""];
     var promptCode = 30;
-    var cursorCode = 125;
+    var cursorCode = 124;
 
     function write(str) {
       str.split("\n").forEach(function(s, i) {
@@ -347,6 +361,10 @@ ultima4.main = (function() {
       write(String.fromCharCode(promptCode));
     }
 
+    function drawCursor(g) {
+      drawChar(g, cursorCode+3-(frame%4), palette[1], palette[0], (24+lines[lines.length-1].length)*16, (11+lines.length)*16);
+    }
+
     function draw(g) {
       g.fillStyle = '#000';
       g.fillRect(24*16, 12*16, width*16, height*16);
@@ -357,13 +375,14 @@ ultima4.main = (function() {
         } else
           drawText(g, s, palette[1], palette[0], 24*16, (12+i)*16);
       });
-      drawChar(g, cursorCode, palette[1], palette[0], (24+lines[lines.length-1].length)*16, (11+lines.length)*16);
+      drawCursor(g);
     }
 
     return {
       write: write,
       writePrompt: writePrompt,
-      draw: draw
+      draw: draw,
+      drawCursor: drawCursor
     };
   }
 
@@ -455,6 +474,10 @@ ultima4.main = (function() {
     map[keys.O] = commandOpen;
     return map;
   }());
+  var frame = 0;
+  var round = 0;
+  var key = null;
+  
   
   var locations = [
     { id: 0, x: 86, y: 107, name: "BRITANNIA" },
@@ -526,4 +549,5 @@ ultima4.main = (function() {
   document.write("<body>");
   document.onkeydown = keyDown;
   document.body.appendChild(canvas);
+  update();
 }());
