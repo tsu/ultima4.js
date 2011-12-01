@@ -237,7 +237,8 @@ ultima4.main = (function() {
         state.town = null;
         s += "\nLEAVING...";
       } 
-      console.pushCommand(s);
+      console.write(s+"\n\n");
+      console.writePrompt();
     };
 
     function canMoveTo(mapX, mapY, town) {
@@ -298,19 +299,22 @@ ultima4.main = (function() {
         s += "WHAT?";
     } else
       s += "WHAT?";
-    console.pushCommand(s);
+    console.write(s + "\n\n");
+    console.writePrompt();
   }
   
   function commandOpen() {
-    console.pushCommand("Open-");
+    console.write("Open-");
   }
 
   function keyDown(e) {
     var command = commands[e.keyCode];
     if (command) {
       command();     
-    } else
-      console.pushCommand("WHAT?");
+    } else {
+      console.write("WHAT?\n\n");
+      console.writePrompt();
+    }
     repaint();
   }
 
@@ -322,48 +326,43 @@ ultima4.main = (function() {
   }
 
   function createConsole() {
-    var maxLines = 11;
+    var height = 12;
     var width = 15;
-    var lines = new Array();
+    var lines = [""];
     var promptCode = 30;
     var cursorCode = 125;
-    var prompt = String.fromCharCode(promptCode);
-    var cursor = String.fromCharCode(cursorCode);
 
-    function pushText(str) {
-      str.split("\n").forEach(function(s) {        
-        if (lines.push(s) > maxLines) 
-          lines.shift();
+    function write(str) {
+      str.split("\n").forEach(function(s, i) {
+        if (i > 0) {
+          if (lines.length == height) 
+            lines.shift();
+          lines.push("");
+        }
+        lines[lines.length-1] += s;
       });
     }
 
-    function pushCommand(s) {
-      pushText(prompt + s +"\n");
-    }
-
-    function drawPrompt(g) {
-      drawChar(g, promptCode, palette[14], palette[0], 24*16, (12+lines.length)*16);
-      drawChar(g, cursorCode, palette[1], palette[0], 25*16, (12+lines.length)*16);
+    function writePrompt() {
+      write(String.fromCharCode(promptCode));
     }
 
     function draw(g) {
       g.fillStyle = '#000';
-      g.fillRect(24*16, 12*16, width*16, maxLines*16);
-      for (var i=0; i<lines.length; i++) {
-        var s = lines[i];
+      g.fillRect(24*16, 12*16, width*16, height*16);
+      lines.forEach(function(s, i) {
         if(s.charCodeAt(0) == promptCode) {
           drawChar(g, promptCode, palette[14], palette[0], 24*16, (12+i)*16);
           drawText(g, s.substr(1), palette[1], palette[0], 25*16, (12+i)*16);
-        } else {
+        } else
           drawText(g, s, palette[1], palette[0], 24*16, (12+i)*16);
-        }
-      }
-      drawPrompt(g);
+      });
+      drawChar(g, cursorCode, palette[1], palette[0], (24+lines[lines.length-1].length)*16, (11+lines.length)*16);
     }
 
     return {
-      pushText: pushText,
-      pushCommand: pushCommand,
+      write: write,
+      writePrompt: writePrompt,
       draw: draw
     };
   }
@@ -376,9 +375,9 @@ ultima4.main = (function() {
   }
 
   function onFinishedLoading() {
-    console.pushText("Welcome to");
-    console.pushText("Ultima IV");
-    console.pushText("");
+    console.write("Welcome to\n");
+    console.write("Ultima IV\n\n");
+    console.writePrompt();
     repaint();
   }
 
