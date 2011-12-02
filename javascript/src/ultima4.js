@@ -186,21 +186,26 @@ ultima4.main = (function() {
   function update() {
     var time = new Date().getTime();
     var wasWork = false;
+    frame++;
+    if(frame > frameLastCommand + 32*4)
+      key = keys.Space;
     if(key) {
       window.console.log("update(): frame: "+ frame + ", key: "+ key);
       var command = commands[key];
       if (command) {
-        command();     
+        command();
+        round++;
+        frameLastCommand = frame;
       } else {
         console.write("WHAT?\n\n");
-        console.writePrompt();
       }
+      console.writePrompt();
       key = null;
       repaint();
       wasWork = true;
     } else
       console.drawCursor(canvas.getContext("2d"));
-    frame++;
+
     time = new Date().getTime() - time;
     if (wasWork)
       window.console.log("frame time: "+ time +" ms");
@@ -259,7 +264,6 @@ ultima4.main = (function() {
         s += "\nLEAVING...";
       } 
       console.write(s+"\n\n");
-      console.writePrompt();
     };
 
     function canMoveTo(mapX, mapY, town) {
@@ -321,11 +325,14 @@ ultima4.main = (function() {
     } else
       s += "WHAT?";
     console.write(s + "\n\n");
-    console.writePrompt();
   }
   
   function commandOpen() {
     console.write("Open-");
+  }
+
+  function commandPass() {
+    console.write("Pass\n\n");
   }
 
   function keyDown(e) {
@@ -411,7 +418,8 @@ ultima4.main = (function() {
     down: 40,
     right: 39,
     E: "E".charCodeAt(0),
-    O: "O".charCodeAt(0)
+    O: "O".charCodeAt(0),
+    Space: 32
   };
 
   var tileType = {
@@ -450,6 +458,8 @@ ultima4.main = (function() {
     x: 86,
     y: 108,
     town: null,
+    food: 10000,
+    gold: 200,
     readInput: null
   };
 
@@ -472,9 +482,11 @@ ultima4.main = (function() {
     map[keys.left] = moveCommand(mutateWest, "West");
     map[keys.E] = commandEnter;
     map[keys.O] = commandOpen;
+    map[keys.Space] = commandPass;
     return map;
   }());
   var frame = 0;
+  var frameLastCommand = 0;
   var round = 0;
   var key = null;
   
