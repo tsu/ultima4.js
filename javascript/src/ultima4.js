@@ -71,21 +71,25 @@ ultima4.main = (function() {
   }
 
   function drawCharLine(g, c, fgColor, bgColor, x, y, dx, dy, n) {
-    for(var i=0; i<n; i++, x+=dx, y+=dy) 
+    for (var i=0; i<n; i++, x+=dx, y+=dy) 
       drawChar(g, c, fgColor, bgColor, x, y);
   }
 
-  function drawTile(g, tile, x, y) {
-    g.drawImage(tiles, (tile%16)*16, Math.floor(tile/16)*16, 16, 16, x, y, 32, 32);
+  function drawTile(g, tile, x, y, frame) {
+    if (typeof frame == "undefined")
+      frame = 0;
+    frame = tilesAnimated.indexOf(tile) == -1 ? 0 : frame % 16;
+    g.drawImage(tiles, (tile%16)*16, Math.floor(tile/16)*16, 16, 16-frame, x, y+frame*2, 32, 32-frame*2);
+    g.drawImage(tiles, (tile%16)*16, Math.floor(tile/16)*16+16-frame, 16, frame, x, y, 32, frame*2);
   }
 
-  function drawViewport(g, mapX, mapY, town) {
+  function drawViewport(g, mapX, mapY, town, frame) {
     var ox = 16 + 5*32;
     var oy = 16 + 5*32;
     for (var y=-5; y<=5; y++) {
       for (var x=-5; x<=5; x++) {
         var  tile = !isTileInLineOfSight(x, y, town) ? tileType.empty : getTileAt(mapX+x,mapY+y,town);
-        drawTile(g, tile, ox + x*32, oy + y*32);
+        drawTile(g, tile, ox + x*32, oy + y*32, frame);
       }
     }
 
@@ -203,13 +207,14 @@ ultima4.main = (function() {
         }
       } else {
         console.write("WHAT?\n\n");
+        console.writePrompt();
       }
       key = null;
-      repaint();
       wasWork = true;
     } else
       console.drawCursor(canvas.getContext("2d"));
 
+    repaint();
     time = new Date().getTime() - time;
     if (wasWork)
       window.console.log("frame time: "+ time +" ms");
@@ -227,7 +232,7 @@ ultima4.main = (function() {
       drawScreenFrames(g);
       hints.redrawScreenFrames = false;
     }
-    drawViewport(g, state.x, state.y, state.town);
+    drawViewport(g, state.x, state.y, state.town, frame);
     drawText(g, "1-TSU      125G", palette[1], palette[0], 24*16, 1*16);
     drawText(g, "2-MKA      125G", palette[1], palette[0], 24*16, 2*16);
     drawText(g, "F:0200   G:0200", palette[1], palette[0], 24*16, 10*16);
@@ -484,6 +489,7 @@ ultima4.main = (function() {
   };
 
   var tilesCanWalkOn = [tileType.swamp, tileType.grass, tileType.bushes, tileType.forest, tileType.hill, tileType.dungeon, tileType.town, tileType.castle, tileType.village, tileType.LBCastleCenter, tileType.stoneFloor, tileType.woodenFloor, tileType.stoneBridge, tileType.woodenBridgeTop, tileType.woodenBridgeBottom, tileType.ruins, tileType.shrine];
+  var tilesAnimated = [tileType.deepOcean, tileType.ocean, tileType.river];
 
   var state = {
     x: 86,
