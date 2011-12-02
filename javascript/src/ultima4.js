@@ -191,15 +191,19 @@ ultima4.main = (function() {
       key = keys.Space;
     if(key) {
       window.console.log("update(): frame: "+ frame + ", key: "+ key);
-      var command = commands[key];
+      var command = activeCommand ? activeCommand : commands[key];
       if (command) {
-        command();
-        round++;
-        frameLastCommand = frame;
+        if(command(activeCommand ? key : null)) {
+          round++;
+          frameLastCommand = frame;
+          activeCommand = null;   // Command ready, no input neede
+          console.writePrompt();
+        } else  {
+          activeCommand = command;  // Input needed
+        }
       } else {
         console.write("WHAT?\n\n");
       }
-      console.writePrompt();
       key = null;
       repaint();
       wasWork = true;
@@ -264,6 +268,7 @@ ultima4.main = (function() {
         s += "\nLEAVING...";
       } 
       console.write(s+"\n\n");
+      return true;
     };
 
     function canMoveTo(mapX, mapY, town) {
@@ -325,14 +330,40 @@ ultima4.main = (function() {
     } else
       s += "WHAT?";
     console.write(s + "\n\n");
+    return true;
   }
   
-  function commandOpen() {
-    console.write("Open-");
+  function commandOpen(key) {
+    if (key == null) {
+      console.write("Open-");
+      return false;
+    } else {
+      var s;
+      switch (key) {
+      case keys.up:
+        s = "North";
+        break;
+      case keys.down:
+        s = "South";
+        break;
+      case keys.left:
+        s = "West";
+        break;
+      case keys.right:
+        s = "East";
+        break;
+      default:
+        s = String.fromCharCode(key);
+      }        
+      console.write(s+"\n");
+      console.write("NOT HERE!\n\n");
+      return true;
+    }
   }
 
   function commandPass() {
     console.write("Pass\n\n");
+    return true;
   }
 
   function keyDown(e) {
@@ -489,6 +520,7 @@ ultima4.main = (function() {
   var frameLastCommand = 0;
   var round = 0;
   var key = null;
+  var activeCommand = null;
   
   
   var locations = [
