@@ -84,26 +84,25 @@
     (let ((buf (make-array (length data) :element-type '(unsigned-byte 8) :fill-pointer 0))
 	  (count 1)
 	  (prev nil))
-      (dolist (byte (coerce data 'list))
-	(when (and prev
-		   (<= 0 byte 7)
-		   (= prev byte))
+      (flet ((emit (byte n)
+               (map nil #'(lambda (b) (vector-push b buf))
+                    (rle-encode-byte byte n))
+               (setf count 1)))
+        (dolist (byte (coerce data 'list))
+          (when (and prev
+                     (<= 0 byte 7)
+                     (= prev byte))
 	    (incf count))
-	(when prev
-	  (if (= prev byte)
-	      (if (<= 0 byte 7)
-		  (when (> count maxlen)
-		    (setf buf (concatenate 'vector buf (rle-encode-byte prev (1- count))))
-		    (setf count 1))
-		  (progn
-		    (setf buf (concatenate 'vector buf (rle-encode-byte prev count)))
-		    (setf count 1)))
-	      (progn
-		(setf buf (concatenate 'vector buf (rle-encode-byte prev count)))
-		(setf count 1))))	      
-	(setf prev byte))
-      (setf buf (concatenate 'vector buf (rle-encode-byte prev count)))
-      buf))
+          (when prev
+            (if (= prev byte)
+                (if (<= 0 byte 7)
+                    (when (> count maxlen)
+                      (emit prev (1- count)))
+                    (emit prev count))
+                (emit prev count)))
+          (setf prev byte))
+        (emit prev count)
+        buf)))
 		  
 	  
 
