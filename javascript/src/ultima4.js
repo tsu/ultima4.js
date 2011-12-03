@@ -218,7 +218,7 @@ ultima4.main = (function() {
     time = new Date().getTime() - time;
     if (wasWork)
       window.console.log("frame time: "+ time +" ms");
-    setTimeout(update, 200);
+    setTimeout(update, Math.max(50, frameTimeMs - time));
   }
 
   function repaint() {
@@ -233,11 +233,17 @@ ultima4.main = (function() {
       hints.redrawScreenFrames = false;
     }
     drawViewport(g, state.x, state.y, state.town, frame);
-    drawText(g, "1-TSU      125G", palette[1], palette[0], 24*16, 1*16);
-    drawText(g, "2-MKA      125G", palette[1], palette[0], 24*16, 2*16);
-    drawText(g, "F:0200   G:0200", palette[1], palette[0], 24*16, 10*16);
-    drawText(g, "WIND SOUTH", palette[1], palette[0], 7*16, 23*16);
-    console.draw(g);
+    if (hints.drawInfo) {
+      drawText(g, "1-TSU      125G", palette[1], palette[0], 24*16, 1*16);
+      drawText(g, "2-MKA      125G", palette[1], palette[0], 24*16, 2*16);
+      drawText(g, "F:0200   G:0200", palette[1], palette[0], 24*16, 10*16);
+      drawText(g, "WIND SOUTH", palette[1], palette[0], 7*16, 23*16); 
+      hints.drawInfo = false;
+    }
+    if (hints.drawConsole) {
+      console.draw(g);
+      hints.drawConsole = false;
+    }
   }
 
   function mutateNorth(state) {
@@ -398,6 +404,7 @@ ultima4.main = (function() {
         }
         lines[lines.length-1] += s;
       });
+      hints.drawConsole = true;
     }
 
     function writePrompt() {
@@ -524,6 +531,7 @@ ultima4.main = (function() {
   }());
   var frame = 0;
   var frameLastCommand = 0;
+  var frameTimeMs = 200;
   var round = 0;
   var key = null;
   var activeCommand = null;
@@ -593,7 +601,9 @@ ultima4.main = (function() {
 
   var hints = {
     redrawScreenFrames: true,
-    clearScreen: true
+    clearScreen: true,
+    drawConsole: true,
+    drawInfo: true
   };
 
   document.write("<body>");
