@@ -9,6 +9,7 @@
 ;;     - if 7th bit is 0, then whole byte is the tile code
 ;;     - if 7th bit is 1, then
 ;;          bits 3..6  is the count 0..15
+;;               if count == 0, then count is in the next byte (16..255)
 ;;          bits 0..2  is the tile code 0..7
 ;;
 ;;   Rank Count Tile
@@ -62,16 +63,23 @@
 	map))))
 
 (defun rle-encode-byte (byte n)
-  "Encode one run of n bytes into single byte"
-  (if (= n 1)
-      byte
-      (when (and (<= 0 n 15)
-		 (<= 0 byte 7))
-	(logior (ash 1 7)
-		(ash n 3)
-		byte))))
+  "Encode one run of n bytes. Returns a list of encoded bytes"
+  (cond
+    ((= n 1) 
+     (list byte))
+    ((and (<= 2 n 15)
+          (<= 0 byte 7))
+     (list (logior (ash 1 7)
+                   (ash n 3)
+                   byte)))
+    ((<= 16 n 255)
+     (list (logior (ash 1 7)
+                   byte)
+           n))
+    (t (error "illegal data for encoding: ~A ~A" byte n))))
+    
 
-(defun rle-encode (data &optional (maxlen 15))
+(defun rle-encode (data &optional (maxlen 255))
   "RLE encodes data in array and returns new array"
     (let ((buf (make-array (length data) :element-type '(unsigned-byte 8) :fill-pointer 0))
 	  (count 1)
@@ -85,16 +93,16 @@
 	  (if (= prev byte)
 	      (if (<= 0 byte 7)
 		  (when (> count maxlen)
-		    (vector-push (rle-encode-byte prev (1- count)) buf)
+		    (setf buf (concatenate 'vector buf (rle-encode-byte prev (1- count))))
 		    (setf count 1))
 		  (progn
-		    (vector-push (rle-encode-byte prev count) buf)
+		    (setf buf (concatenate 'vector buf (rle-encode-byte prev count)))
 		    (setf count 1)))
 	      (progn
-		(vector-push (rle-encode-byte prev count) buf)
+		(setf buf (concatenate 'vector buf (rle-encode-byte prev count)))
 		(setf count 1))))	      
 	(setf prev byte))
-      (vector-push (rle-encode-byte prev count) buf)
+      (setf buf (concatenate 'vector buf (rle-encode-byte prev count)))
       buf))
 		  
 	  
