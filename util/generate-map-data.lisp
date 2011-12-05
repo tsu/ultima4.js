@@ -47,6 +47,33 @@
   (ql:quickload "cl-base64"))
 
 
+(defun seq-slice (seq n)
+  "Slices sequence in slices with length of n. Returns a list of slices"
+  (let ((res))
+    (dotimes (i (ceiling (/ (length seq) n)))
+      (push (subseq seq (* i n) 
+                    (min (* (1+ i) n) (length seq)))
+            res))
+    (nreverse res)))
+      
+(defun quad-encode (data x y n &optional ht)
+  "Encode 2d array data in quad-tree format"
+  (if ht
+      (flet ((code (val)
+               (if (gethash val ht)
+                   (gethash val ht)
+                   (setf (gethash val ht) (1+ (hash-table-count ht))))))
+        (if (= n 1)
+            (code (aref data y x))
+            (let ((m (/ n 2)))
+              (code (list (quad-encode data x y m ht)
+                          (quad-encode data (+ x m) y m ht)
+                          (quad-encode data x (+ y m) m ht)
+                          (quad-encode data (+ x m) (+ y m) m ht))))))
+      (let ((table (make-hash-table :test 'equal)))
+        (quad-encode data x y n table)
+        table)))
+
 (defun read-worldmap (filename)
   "Read worl map (tile codes) from file into array"
   (when (probe-file filename)
@@ -78,6 +105,8 @@
            n))
     (t (error "illegal data for encoding: ~A ~A" byte n))))
     
+(defun quad-tree (data size &optional (map (make-hash-table)))
+)
 
 (defun rle-encode (data &optional (maxlen 255))
   "RLE encodes data in array and returns new array"
