@@ -65,24 +65,15 @@ ultima4.main = (function() {
   }
   
   function getInhabitantTileAt(x, y, town) {
-    var a = getInhabitants(town);
-    var tile = null;
-    a.forEach(function(h) {
-      if (h.x==x && h.y==y)
-        tile = h.tile;
-    });
-    return tile;
-  }
-
-  function getInhabitants(town) {
-    var a = new Array();
-    for(var i=0; i<32; i++) {
-      var tile = parseHexByte(townInhabitants, town*256+i*8);
-      if(tile != 0) 
-        a.push({tile: tile, x: parseHexByte(townInhabitants, town*256+i*8+1),
-                y: parseHexByte(townInhabitants, town*256+i*8+2)});
-    }
-    return a;
+    if (town!=null && town>=0 && town<=16) {
+      var a = townInhabitants[town];
+      var tile = null;
+      a.forEach(function(h) {
+        if (h.x==x && h.y==y)
+          tile = h.tile;
+      });
+      return tile;
+    } 
   }
 
   function drawChar(g, c, fgColor, bgColor, x, y) {
@@ -129,14 +120,6 @@ ultima4.main = (function() {
 
     function isInViewport(x, y) {
       return x>=mapX-5 && x<=mapX+5 && y>=mapY-5 && y<=mapY+5;
-    }
-
-    function drawInhabitants(g, town) {
-      var a = getInhabitants(town);
-      a.forEach(function(h) {
-        if(isInViewport(h.x, h.y))
-          drawTile(g, h.tile, (h.x-mapX+5)*32+16, (h.y-mapY+5)*32+16);
-      });
     }
 
     function isTileInLineOfSight(x, y, town) {
@@ -552,7 +535,23 @@ ultima4.main = (function() {
   var console = createConsole();
   var worldMap = ultima4.gameData.worldMap;
   var townMaps = ultima4.gameData.townMaps;
-  var townInhabitants = ultima4.gameData.townInhabitants;
+  var townInhabitants = (function() {
+    var s = ultima4.gameData.townInhabitants;
+    var towns = new Array();
+    for (var j=0; j<=16; j++) {
+      var a = new Array();
+      for(var i=0; i<32; i++) {
+        var tile = parseHexByte(s, j*256+i*8);
+        if(tile != 0) 
+          a.push({tile: tile, 
+                  x: parseHexByte(s, j*256+i*8+1),
+                  y: parseHexByte(s, j*256+i*8+2)});
+      }
+      towns[j] = a;
+    }
+    return towns;
+  }());
+
   var tiles = createTiles();
   var canvas = createCanvas();
   var commands = (function() {
