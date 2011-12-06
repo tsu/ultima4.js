@@ -394,8 +394,14 @@ ultima4.main = (function() {
     return true;
   }
 
+  function commandVolume() {
+    console.write("Volume OFF\n\n");
+    return true;
+  }
+
   function keyDown(e) {
-    key = e.keyCode;
+    if (e.keyCode>=keys.Space && e.keyCode<=keys.Z)
+      key = e.keyCode;
   }
 
   function createCanvas() {
@@ -473,13 +479,15 @@ ultima4.main = (function() {
   }
 
   var keys = {
+    Space: 32,
     up: 38,
     left: 37,
     down: 40,
     right: 39,
     E: "E".charCodeAt(0),
     O: "O".charCodeAt(0),
-    Space: 32
+    V: "V".charCodeAt(0),
+    Z: "Z".charCodeAt(0)
   };
 
   var tileType = {
@@ -561,9 +569,10 @@ ultima4.main = (function() {
     map[keys.right] = moveCommand(mutateEast, "East");
     map[keys.down] = moveCommand(mutateSouth, "South");
     map[keys.left] = moveCommand(mutateWest, "West");
+    map[keys.Space] = commandPass;
     map[keys.E] = commandEnter;
     map[keys.O] = commandOpen;
-    map[keys.Space] = commandPass;
+    map[keys.V] = commandVolume;
     return map;
   }());
   var frame = 0;
