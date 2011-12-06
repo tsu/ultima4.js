@@ -391,11 +391,17 @@ ultima4.main = (function() {
       }        
       console.write(s+"\n");
       var tile = getTownTileAt(pos.x, pos.y, state.town);
-      if (tile == tileType.doorUnlocked) {
+      switch (tile) {
+      case tileType.doorUnlocked:
         console.write("OPENED!\n\n");
         openDoor = { x: pos.x, y: pos.y, openRound: round };
-      } else
+        break;
+      case tileType.doorLocked:
+        console.write("CAN'T!\n\n");
+        break;
+      default:
         console.write("NOT HERE!\n\n");
+      }
       return true;
     }
   }
