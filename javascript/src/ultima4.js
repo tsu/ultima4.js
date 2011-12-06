@@ -499,6 +499,7 @@ ultima4.main = (function() {
     LBCastleLeft: 13,
     LBCastleCenter: 14,
     LBCastleRight: 15,
+    tileFloor: 0x16,
     stoneBridge: 0x17,
     woodenBridgeTop: 0x19,
     woodenBridgeBottom: 0x1a,
@@ -515,7 +516,7 @@ ultima4.main = (function() {
     wall: 0x7f
   };
 
-  var tilesCanWalkOn = [tileType.swamp, tileType.grass, tileType.bushes, tileType.forest, tileType.hill, tileType.dungeon, tileType.town, tileType.castle, tileType.village, tileType.LBCastleCenter, tileType.stoneFloor, tileType.woodenFloor, tileType.stoneBridge, tileType.woodenBridgeTop, tileType.woodenBridgeBottom, tileType.ruins, tileType.shrine, tileType.wallSecretDoor];
+  var tilesCanWalkOn = [tileType.swamp, tileType.grass, tileType.bushes, tileType.forest, tileType.hill, tileType.dungeon, tileType.town, tileType.castle, tileType.village, tileType.LBCastleCenter, tileType.stoneFloor, tileType.woodenFloor, tileType.stoneBridge, tileType.woodenBridgeTop, tileType.woodenBridgeBottom, tileType.ruins, tileType.shrine, tileType.wallSecretDoor, tileType.tileFloor];
   var tilesAnimated = [tileType.deepOcean, tileType.ocean, tileType.river];
 
   var state = {
