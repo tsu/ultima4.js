@@ -39,8 +39,15 @@ ultima4.gameData = (function() {
 }());
 
 ultima4.main = (function() {
+  function parseHexByte(s, n) {
+    return parseInt(s.substr(n*2, 2), 16);
+  }
+
   function getTileAt(x, y, town) {
-    if (openDoor && openDoor.x==x && openDoor.y==y)
+    var tile = getInhabitantTileAt(x, y, town);
+    if (tile)
+      return tile;
+    else if (openDoor && openDoor.x==x && openDoor.y==y)
       return tileType.stoneFloor;
     else
       return typeof town == "undefined" || town == null ? 
@@ -54,14 +61,34 @@ ultima4.main = (function() {
 
   function getTownTileAt(x, y, town) {
     return (x>=0 && x<32 && y>=0 && y<32) ?
-      parseInt(townMaps.substr(town*1024*2 + y*32*2 + x*2, 2), 16) :
-      4;
+      parseHexByte(townMaps, town*1024 + y*32 + x) : tileType.grass;
+  }
+  
+  function getInhabitantTileAt(x, y, town) {
+    var a = getInhabitants(town);
+    var tile = null;
+    a.forEach(function(h) {
+      if (h.x==x && h.y==y)
+        tile = h.tile;
+    });
+    return tile;
+  }
+
+  function getInhabitants(town) {
+    var a = new Array();
+    for(var i=0; i<32; i++) {
+      var tile = parseHexByte(townInhabitants, town*256+i*8);
+      if(tile != 0) 
+        a.push({tile: tile, x: parseHexByte(townInhabitants, town*256+i*8+1),
+                y: parseHexByte(townInhabitants, town*256+i*8+2)});
+    }
+    return a;
   }
 
   function drawChar(g, c, fgColor, bgColor, x, y) {
     if(c>=0 && c<=127) {
       for (var row=0; row<8; row++) {
-        var b =  parseInt(ultima4.gameData.font.substr(c*8*2 + row*2, 2), 16);
+        var b =  parseHexByte(ultima4.gameData.font, c*8 + row)
         for (var i=7; i>=0; i--) {
           g.fillStyle = (b & (1<<i)) ? fgColor : bgColor;
           g.fillRect(x+8*2-(i+1)*2, y+row*2, 2, 2);
@@ -98,8 +125,6 @@ ultima4.main = (function() {
       }
     }
 
-    if(town != null)
-      drawInhabitants(g, town);
     drawTile(g, 31, ox, oy);
 
     function isInViewport(x, y) {
@@ -112,21 +137,6 @@ ultima4.main = (function() {
         if(isInViewport(h.x, h.y))
           drawTile(g, h.tile, (h.x-mapX+5)*32+16, (h.y-mapY+5)*32+16);
       });
-    }
-
-    function parseHexByte(s, n) {
-      return parseInt(s.substr(n*2, 2), 16);
-    }
-
-    function getInhabitants(town) {
-      var a = new Array();
-      for(var i=0; i<32; i++) {
-        var tile = parseHexByte(townInhabitants, town*256+i*8);
-        if(tile != 0) 
-          a.push({tile: tile, x: parseHexByte(townInhabitants, town*256+i*8+1),
-                  y: parseHexByte(townInhabitants, town*256+i*8+2)});
-      }
-      return a;
     }
 
     function isTileInLineOfSight(x, y, town) {
