@@ -40,7 +40,10 @@ ultima4.gameData = (function() {
 
 ultima4.main = (function() {
   function getTileAt(x, y, town) {
-    return typeof town == "undefined" || town == null ? 
+    if (openDoor && openDoor.x==x && openDoor.y==y)
+      return tileType.stoneFloor;
+    else
+      return typeof town == "undefined" || town == null ? 
       getMapTileAt(x, y) : 
       getTownTileAt(x, y, town);      
   }
@@ -216,6 +219,9 @@ ultima4.main = (function() {
     } else
       console.drawCursor(canvas.getContext("2d"));
 
+    if (openDoor && round>openDoor.openRound+4)
+      openDoor = null;
+
     repaint();
     time = new Date().getTime() - time;
     if (wasWork)
@@ -349,27 +355,37 @@ ultima4.main = (function() {
   function commandOpen(key) {
     if (key == null) {
       console.write("Open-");
+      openDoor = null;
       return false;
     } else {
-      var s;
+      var s, pos=null;
       switch (key) {
       case keys.up:
         s = "North";
+        pos = { x: state.x, y: state.y-1 };
         break;
       case keys.down:
         s = "South";
+        pos = { x: state.x, y: state.y+1 };
         break;
       case keys.left:
         s = "West";
+        pos = { x: state.x-1, y: state.y };
         break;
       case keys.right:
         s = "East";
+        pos = { x: state.x+1, y: state.y };
         break;
       default:
         s = String.fromCharCode(key);
       }        
       console.write(s+"\n");
-      console.write("NOT HERE!\n\n");
+      var tile = getTownTileAt(pos.x, pos.y, state.town);
+      if (tile == tileType.doorUnlocked) {
+        console.write("OPENED!\n\n");
+        openDoor = { x: pos.x, y: pos.y, openRound: round };
+      } else
+        console.write("NOT HERE!\n\n");
       return true;
     }
   }
@@ -491,6 +507,8 @@ ultima4.main = (function() {
     ladderDown: 0x1c,
     ruins: 0x1d,
     shrine: 0x1e,
+    doorLocked: 0x3a,
+    doorUnlocked: 0x3b,
     stoneFloor: 0x3e,
     woodenfloor: 0x3f,
     empty: 69,
@@ -537,6 +555,7 @@ ultima4.main = (function() {
   var round = 0;
   var key = null;
   var activeCommand = null;
+  var openDoor = null;
   
   
   var locations = [
