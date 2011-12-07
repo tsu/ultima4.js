@@ -271,9 +271,14 @@ ultima4.main = (function() {
     return function() {
       var s = displayName;
       var newState = mutator(state);
-      if (canMoveTo(newState.x, newState.y, state.town)) {
-        state.x = newState.x;
-        state.y = newState.y;
+      var tile = getTileAt(newState.x, newState.y, state.town);
+      if (canWalkOn(tile)) {
+        if (canMoveTo(tile)) {
+          state.x = newState.x;
+          state.y = newState.y;
+        } else {
+          s += "\nSLOW PROGRESS!";
+        }
       } else {
         s += "\nBLOCKED!";
       }
@@ -287,8 +292,21 @@ ultima4.main = (function() {
       return true;
     };
 
-    function canMoveTo(mapX, mapY, town) {
-      return tilesCanWalkOn.indexOf(getTileAt(mapX, mapY, town)) != -1;
+    function canWalkOn(tile) {
+      return tilesCanWalkOn.indexOf(tile) != -1;
+    }
+
+    function canMoveTo(tile) {
+      var difficulty = terrainDifficulty[tile];
+      if (difficulty) {
+        return randomIntBetween(0, difficulty) > 0;
+      } else {
+        return true;
+      }
+    }
+
+    function randomIntBetween(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
     }
   }
 
@@ -527,6 +545,16 @@ ultima4.main = (function() {
     empty: 69,
     wall: 0x7f
   };
+
+  var terrainDifficulty = (function() {
+    var a = {};
+    a[tileType.forest] = 2;
+    a[tileType.hill] = 2;
+    a[tileType.swamp] = 2;
+    a[tileType.bushes] = 10;
+
+    return a;
+  }());
 
   var tilesCanWalkOn = [tileType.swamp, tileType.grass, tileType.bushes, tileType.forest, tileType.hill, tileType.dungeon, tileType.town, tileType.castle, tileType.village, tileType.LBCastleCenter, tileType.stoneFloor, tileType.woodenFloor, tileType.stoneBridge, tileType.woodenBridgeTop, tileType.woodenBridgeBottom, tileType.ruins, tileType.shrine, tileType.wallSecretDoor, tileType.tileFloor];
   var tilesAnimated = [tileType.deepOcean, tileType.ocean, tileType.river];
