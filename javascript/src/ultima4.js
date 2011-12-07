@@ -188,34 +188,38 @@ ultima4.main = (function() {
   function update() {
     var time = new Date().getTime();
     var wasWork = false;
-    frame++;
-    if(frame > frameLastCommand + 32*4)
-      key = keys.Space;
-    if(key) {
-      window.console.log("update(): frame: "+ frame + ", key: "+ key);
-      var command = activeCommand ? activeCommand : commands[key];
-      if (command) {
-        if(command(activeCommand ? key : null)) {
-          round++;
-          frameLastCommand = frame;
-          activeCommand = null;   // Command ready, no input neede
-          console.writePrompt();
-        } else  {
-          activeCommand = command;  // Input needed
+    if (key == keys.F1)
+      isPause = !isPause;
+    if (!isPause) {     
+      frame++;
+      if(frame > frameLastCommand + 32*4)
+        key = keys.Space;
+      if(key) {
+        window.console.log("update(): frame: "+ frame + ", key: "+ key);
+        var command = activeCommand ? activeCommand : commands[key];
+        if (command) {
+          if(command(activeCommand ? key : null)) {
+            round++;
+            frameLastCommand = frame;
+            activeCommand = null;   // Command ready, no input neede
+            console.writePrompt();
+          } else  {
+            activeCommand = command;  // Input needed
+          }
+        } else {
+          if (key != keys.F1) {
+            console.write("WHAT?\n\n");
+            console.writePrompt();
+          }
         }
-      } else {
-        console.write("WHAT?\n\n");
-        console.writePrompt();
-      }
-      key = null;
-      wasWork = true;
-    } else
-      console.drawCursor(canvas.getContext("2d"));
-
-    if (openDoor && round>openDoor.openRound+4)
-      openDoor = null;
-
-    repaint();
+        wasWork = true;
+      } else
+        console.drawCursor(canvas.getContext("2d"));      
+      if (openDoor && round>openDoor.openRound+4)
+        openDoor = null;
+      repaint();
+    }
+    key = null;
     time = new Date().getTime() - time;
     if (wasWork)
       window.console.log("frame time: "+ time +" ms");
@@ -373,7 +377,7 @@ ultima4.main = (function() {
         s = String.fromCharCode(key);
       }        
       console.write(s+"\n");
-      var tile = getTownTileAt(pos.x, pos.y, state.town);
+      var tile = pos ? getTownTileAt(pos.x, pos.y, state.town) : null;
       switch (tile) {
       case tileType.doorUnlocked:
         console.write("OPENED!\n\n");
@@ -400,8 +404,7 @@ ultima4.main = (function() {
   }
 
   function keyDown(e) {
-    if (e.keyCode>=keys.Space && e.keyCode<=keys.Z)
-      key = e.keyCode;
+    key = e.keyCode;
   }
 
   function createCanvas() {
@@ -484,6 +487,7 @@ ultima4.main = (function() {
     left: 37,
     down: 40,
     right: 39,
+    F1: 112, 
     E: "E".charCodeAt(0),
     O: "O".charCodeAt(0),
     V: "V".charCodeAt(0),
@@ -582,6 +586,7 @@ ultima4.main = (function() {
   var key = null;
   var activeCommand = null;
   var openDoor = null;
+  var isPause = false;
   
   
   var locations = [
