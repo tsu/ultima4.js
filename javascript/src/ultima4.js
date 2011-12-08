@@ -132,7 +132,7 @@ ultima4.main = (function() {
     }
 
     function blocksView(tile) {
-      return [tileType.mountain, tileType.forest, tileType.wall].indexOf(tile) != -1;
+      return [tileType.mountain, tileType.forest, tileType.wall, tileType.wallSecretDoor].indexOf(tile) != -1;
     }
 
     function numberOfSightBlockersOnLine(x0, y0, x1, y1, town) {
@@ -572,7 +572,7 @@ ultima4.main = (function() {
     return a;
   }());
 
-  var tilesCanWalkOn = [tileType.swamp, tileType.grass, tileType.bushes, tileType.forest, tileType.hill, tileType.dungeon, tileType.town, tileType.castle, tileType.village, tileType.LBCastleCenter, tileType.stoneFloor, tileType.woodenFloor, tileType.stoneBridge, tileType.woodenBridgeTop, tileType.woodenBridgeBottom, tileType.ruins, tileType.shrine, tileType.wallSecretDoor, tileType.tileFloor];
+  var tilesCanWalkOn = [tileType.swamp, tileType.grass, tileType.bushes, tileType.forest, tileType.hill, tileType.dungeon, tileType.town, tileType.castle, tileType.village, tileType.LBCastleCenter, tileType.stoneFloor, tileType.woodenFloor, tileType.stoneBridge, tileType.woodenBridgeTop, tileType.woodenBridgeBottom, tileType.ruins, tileType.shrine, tileType.wallSecretDoor, tileType.tileFloor, tileType.ladderUp, tileType.ladderDown];
   var tilesAnimated = [tileType.deepOcean, tileType.ocean, tileType.river];
 
   var state = {
