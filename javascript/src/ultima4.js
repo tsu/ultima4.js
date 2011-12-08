@@ -70,7 +70,7 @@ ultima4.main = (function() {
       var tile = null;
       a.forEach(function(h) {
         if (h.x==x && h.y==y)
-          tile = h.tile;
+          tile = (h.tile & 0xFE) | randomIntBetween(0, 1);
       });
       return tile;
     } 
@@ -309,10 +309,10 @@ ultima4.main = (function() {
         return true;
       }
     }
+  }
 
-    function randomIntBetween(min, max) {
-      return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
+  function randomIntBetween(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
   }
 
   function padStringCenter(s, len) {
