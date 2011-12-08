@@ -251,6 +251,11 @@ ultima4.main = (function() {
     }
   }
 
+  function mutatePosByDir(pos, dir) {
+    var m = dirPosMutations[dir];
+    return m ? { x: pos.x+=m.x, y: pos.y+=m.y } : pos;
+  }
+
   function mutateNorth(state) {
     return { x: state.x, y: state.y - 1 };
   }
@@ -319,6 +324,14 @@ ultima4.main = (function() {
     return s;
   }
 
+  function isDirKey(key) {
+    return [keys.left, keys.right, keys.up, keys.down].indexOf(key) != -1;
+  }
+
+  function getDirKeyName(key) {
+    return dirKeyNames[key];
+  }
+
   function commandEnter() {
     var s = "Enter ";    
     if(state.town == null) {
@@ -374,24 +387,10 @@ ultima4.main = (function() {
       return false;
     } else {
       var s, pos=null;
-      switch (key) {
-      case keys.up:
-        s = "North";
-        pos = { x: state.x, y: state.y-1 };
-        break;
-      case keys.down:
-        s = "South";
-        pos = { x: state.x, y: state.y+1 };
-        break;
-      case keys.left:
-        s = "West";
-        pos = { x: state.x-1, y: state.y };
-        break;
-      case keys.right:
-        s = "East";
-        pos = { x: state.x+1, y: state.y };
-        break;
-      default:
+      if (isDirKey(key)) {
+        s = getDirKeyName(key);
+        pos = mutatePosByDir( {x: state.x, y: state.y }, key);
+      } else {
         s = String.fromCharCode(key);
       }        
       console.write(s+"\n");
@@ -414,6 +413,22 @@ ultima4.main = (function() {
   function commandPass() {
     console.write("Pass\n\n");
     return true;
+  }
+
+  function commandTalk(key) {
+    if (key == null) {
+      console.write("Talk-");
+      return false;
+    } else {
+      if (isDirKey(key)) {
+        console.write(getDirKeyName(key));
+        console.write("\nFUNNY, NO\nRESPONSE!\n\n");
+      } else {
+        console.write(String.fromCharCode(key));
+        console.write("\nPass\n\n");
+      }
+      return true;
+    }
   }
 
   function commandVolume() {
@@ -508,6 +523,7 @@ ultima4.main = (function() {
     F1: 112, 
     E: "E".charCodeAt(0),
     O: "O".charCodeAt(0),
+    T: "T".charCodeAt(0),
     V: "V".charCodeAt(0),
     Z: "Z".charCodeAt(0)
   };
@@ -604,6 +620,7 @@ ultima4.main = (function() {
     map[keys.Space] = commandPass;
     map[keys.E] = commandEnter;
     map[keys.O] = commandOpen;
+    map[keys.T] = commandTalk;
     map[keys.V] = commandVolume;
     return map;
   }());
@@ -616,7 +633,24 @@ ultima4.main = (function() {
   var openDoor = null;
   var isPause = false;
   
-  
+  var dirKeyNames = (function() {
+    var m = {};
+    m[keys.up] = "North";
+    m[keys.down] = "South";
+    m[keys.left] = "West";
+    m[keys.right] = "East";
+    return m;
+  }());
+
+  var dirPosMutations = (function() {
+    var m = {};
+    m[keys.up] = { x: 0, y: -1 };
+    m[keys.down] = { x: 0, y: +1 };
+    m[keys.left] = { x: -1, y: 0 };
+    m[keys.right] = { x: +1, y: 0};
+    return m;
+  }());
+
   var locations = [
     { id: 0, x: 86, y: 107, name: "BRITANNIA" },
     { id: 1, x: 218, y: 107, name: "THE LYCAEUM" },
