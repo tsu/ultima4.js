@@ -69,18 +69,19 @@ ultima4.main = (function() {
   }
   
   function getInhabitantTileAt(x, y, town) {
-    if (town!=null && town>=0 && town<=16) {
-      var a = townInhabitants[town];
-      var tile = null;
-      a.forEach(function(h) {
-        if (h.x==x && h.y==y)
-          tile = h.tile;
-        if ((tile>=0x20 && tile<=0x2F) || (tile>=0x50 && tile<=0x5F))
-          tile = tile & 0xFE | randomIntBetween(0, 1);
-      });
-      return tile;
-    } 
+    var h = getInhabitantAt(x, y, town);
+    if (h) 
+      return (h.tile>=0x20 && h.tile<=0x2F) || (h.tile>=0x50 && h.tile<=0x5F) ?
+      h.tile & 0xFE | randomIntBetween(0, 1) : h.tile;
   }
+
+  function getInhabitantAt(x, y, town) {
+    if (town!=null && town>=0 && town<=16) 
+      return townInhabitants[town].filter(function(e) {
+        return e.x==x && e.y==y;
+      })[0];
+  }
+
 
   function drawChar(g, c, fgColor, bgColor, x, y) {
     if(c>=0 && c<=127) {
