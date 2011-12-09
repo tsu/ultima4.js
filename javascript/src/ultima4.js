@@ -560,7 +560,7 @@ ultima4.main = (function() {
     doorLocked: 0x3a,
     doorUnlocked: 0x3b,
     stoneFloor: 0x3e,
-    woodenfloor: 0x3f,
+    woodenFloor: 0x3f,
     wallSecretDoor: 0x49,
     empty: 69,
     wall: 0x7f
@@ -588,10 +588,7 @@ ultima4.main = (function() {
     readInput: null
   };
 
-  var palette = ["#000000", "#FDFEFC", "#BE1A24", "#30E6C6",
-                 "#B41AE2", "#1FD21E", "#211BAE", "#DFF60A", 
-		 "#B84104", "#6A3304", "#FE4A57", "#424540",
-		 "#70746F", "#59FE59", "#5F53FE", "#A4A7A2"];
+  var palette = ["#000000", "#FDFEFC", "#BE1A24", "#30E6C6", "#B41AE2", "#1FD21E", "#211BAE", "#DFF60A", "#B84104", "#6A3304", "#FE4A57", "#424540", "#70746F", "#59FE59", "#5F53FE", "#A4A7A2"];
 
   var console = createConsole();
   var worldMap = ultima4.gameData.worldMap;
@@ -728,4 +725,8 @@ ultima4.main = (function() {
   document.onkeydown = keyDown;
   document.body.appendChild(canvas);
   update();
+
+  return {
+    state: state
+  };
 }());
