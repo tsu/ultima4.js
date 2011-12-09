@@ -74,7 +74,9 @@ ultima4.main = (function() {
       var tile = null;
       a.forEach(function(h) {
         if (h.x==x && h.y==y)
-          tile = (h.tile & 0xFE) | randomIntBetween(0, 1);
+          tile = h.tile;
+        if ((tile>=0x20 && tile<=0x2F) || (tile>=0x50 && tile<=0x5F))
+          tile = tile & 0xFE | randomIntBetween(0, 1);
       });
       return tile;
     } 
