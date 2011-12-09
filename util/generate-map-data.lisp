@@ -1,8 +1,9 @@
 #!/usr/local/bin/sbcl --script
 ;;;; generate ultima4 map data from d64 disk image
 ;; Examples
-;;   ./generate-map-data.lisp ../c64u4/ULTIMA4C.D64 hex
-;;   ./generate-map-data.lisp ../c64u4/ULTIMA4C.D64 base64
+;;   ./generate-map-data.lisp ../c64u4/ULTIMA4C.D64 world hex
+;;   ./generate-map-data.lisp ../c64u4/ULTIMA4C.D64 world base64
+;;   ./generate-map-data.lisp ../c64u4/ULTIMA4B.D64 town rle-base64
 
 ;;; Histogram of tile codes in ultima4 world map, which leads to run lenght 
 ;;; encoding
@@ -89,6 +90,16 @@
 	      (read-sequence map in :start (+ p (* i 256)) :end (+ p (* i 256) 16)))))
 	map))))
 
+(defun read-town-maps (filename)
+  "Read all towne maps from file into array"
+  (when (probe-file filename)
+    (with-open-file (in filename :element-type '(unsigned-byte 8))
+      (let ((maps (make-array (* 256 4 17) :element-type '(unsigned-byte 8))))
+	(dotimes (town 17)
+          (file-position in (* (+ 257 (* town 5)) 256))
+          (read-sequence maps in :start (* 256 4 town) :end (+ (* 256 4 town) 1024)))
+        maps))))
+  
 (defun rle-encode-byte (byte n)
   "Encode one run of n bytes. Returns a list of encoded bytes"
   (cond
@@ -105,9 +116,6 @@
            n))
     (t (error "illegal data for encoding: ~A ~A" byte n))))
     
-(defun quad-tree (data size &optional (map (make-hash-table)))
-)
-
 (defun rle-encode (data &optional (maxlen 255))
   "RLE encodes data in array and returns new array"
     (let ((buf (make-array (length data) :element-type '(unsigned-byte 8) :fill-pointer 0))
@@ -133,34 +141,65 @@
         (emit prev count)
         buf)))
 		  
-	  
+(defun do-world-map (disk-name fmt)
+  "Read world map data from disk and output data in format fmt"
+  (let ((data (read-worldmap disk-name)))
+    (cond
+      ((string= fmt "hex")
+       (dotimes (y 256)
+         (format t "~{~2,'0X~}~%" 
+                 (coerce (subseq data 
+                                 (* y 256) 
+                                 (+ (* y 256) 256)) 
+                         'list))))
+      ((string= fmt "base64")
+       (format t "~A~%"
+               (cl-base64:usb8-array-to-base64-string data :columns 76)))
+      ((string= fmt "rle-base64")
+       (format t "~A~%"
+               (cl-base64:usb8-array-to-base64-string (rle-encode data) :columns 76)))
+      (t (error "unknown format: ~A" fmt)))))
+
+(defun do-town-maps (disk-name fmt)
+  "Read town maps data from disk and output data in format fmt"
+  (let ((data (read-town-maps disk-name)))
+    (cond
+      ((string= fmt "hex")
+       (format t "~{~2,'0X~}~%" 
+               (coerce data 'list)))
+      ((string= fmt "base64")
+       (format t "~A~%"
+               (cl-base64:usb8-array-to-base64-string data :columns 76)))
+      ((string= fmt "rle-base64")
+       (format t "~A~%"
+               (cl-base64:usb8-array-to-base64-string (rle-encode data) :columns 76)))
+      (t (error "unknown format: ~A" fmt)))))
+
 
 ;;; Startup from command line
 (let ((argv sb-ext:*posix-argv*))
-  (if (> (length argv) 2)
+  (if (> (length argv) 3)
       (let* ((disk-name (nth 1 argv))
-	     (data (read-worldmap disk-name))
-	     (frmt (nth 2 argv)))
-	(if data
-	    (cond
-	      ((string= frmt "hex")
-	       (dotimes (y 256)
-		 (format t "~{~2,'0X~}~%" (coerce (subseq data 
-							  (* y 256) 
-							  (+ (* y 256) 256)) 
-						  'list))))
-	      ((string= frmt "base64")
-	       (format t "~A~%"
-		       (cl-base64:usb8-array-to-base64-string data :columns 76)))
-	      ((string= frmt "rle-base64")
-	       (format t "~A~%"
-		       (cl-base64:usb8-array-to-base64-string (rle-encode data) :columns 76)))
-	      (t
-	       (format t "error: unknown format: ~A~%" frmt)))
-	    (format t "error: could not read data from file: ~A~%" disk-name)))
-      (format t "usage: generate-map-data.lisp <britannia-disk> <format>~%~{~A~%~}"
-	      '("where <format> is:"
-		"      hex         hex codes with two digits per byte, 256 bytes per line"
-		"      base64      base64 encoded bytes, 76 chars per line"
-		"      rle-base64  run length encoded + base64 encodede"))))
+             (type (nth 2 argv))
+             (frmt (nth 3 argv)))
+        (cond 
+          ((not (probe-file disk-name))
+           (format t "error: no such file: ~A~%" disk-name))
+          ((and (string/= frmt "hex")
+                (string/= frmt "base64")
+                (string/= frmt "rle-base64"))
+           (format t "error: unknown format: ~A~%" frmt))
+           (t
+            (cond
+              ((string= type "world")
+               (do-world-map disk-name frmt))
+              ((string= type "town")
+               (do-town-maps disk-name frmt))
+              (t 
+               (format t "error: uknown type (not world or town): ~A~%" type))))))
+      (format t "usage: generate-map-data.lisp <britannia/towne-disk> [world|town] <format>~%~{~A~%~}"
+              '("where <format> is:"
+                "      hex         hex codes with two digits per byte, 256 bytes per line"
+                "      base64      base64 encoded bytes, 76 chars per line"
+                "      rle-base64  run length encoded + base64 encodede"))))
 
