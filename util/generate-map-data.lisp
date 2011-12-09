@@ -11,6 +11,7 @@
 ;;     - if 7th bit is 1, then
 ;;          bits 3..6  is the count 0..15
 ;;               if count == 0, then count is in the next byte (16..255)
+;;               if next (2nd) byte is 0, then count=1 and code=3rd byte
 ;;          bits 0..2  is the tile code 0..7
 ;;
 ;;   Rank Count Tile
@@ -102,19 +103,21 @@
   
 (defun rle-encode-byte (byte n)
   "Encode one run of n bytes. Returns a list of encoded bytes"
-  (cond
-    ((= n 1) 
-     (list byte))
-    ((and (<= 2 n 15)
-          (<= 0 byte 7))
-     (list (logior (ash 1 7)
-                   (ash n 3)
-                   byte)))
-    ((<= 16 n 255)
-     (list (logior (ash 1 7)
-                   byte)
-           n))
-    (t (error "illegal data for encoding: ~A ~A" byte n))))
+  (if (> (logand byte #x80) 0)
+      (list (ash 1 7) 0 byte)
+      (cond
+        ((= n 1) 
+         (list byte))
+        ((and (<= 2 n 15)
+              (<= 0 byte 7))
+         (list (logior (ash 1 7)
+                       (ash n 3)
+                       byte)))
+        ((<= 16 n 255)
+         (list (logior (ash 1 7)
+                       byte)
+               n))
+        (t (error "illegal data for encoding: ~A ~A" byte n)))))
     
 (defun rle-encode (data &optional (maxlen 255))
   "RLE encodes data in array and returns new array"
