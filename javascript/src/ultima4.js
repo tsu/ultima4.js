@@ -72,7 +72,7 @@ ultima4.main = (function() {
     var h = getInhabitantAt(x, y, town);
     if (h) 
       return (h.tile>=0x20 && h.tile<=0x2F) || (h.tile>=0x50 && h.tile<=0x5F) ?
-      h.tile & 0xFE | randomIntBetween(0, 1) : h.tile;
+      h.tile ^ randomIntBetween(0, 1) : h.tile;
   }
 
   function getInhabitantAt(x, y, town) {
@@ -354,7 +354,7 @@ ultima4.main = (function() {
       return e.type == 1 && randomIntBetween(0, 1) == 0;
     }).forEach(function(e) {
       var pos = mutatePosByDir({x: e.x, y: e.y}, randomIntBetween(0, 3));
-      if(canWalkOn(getTileAt(pos.x, pos.y, town))) {
+      if(!(pos.x==state.x && pos.y==state.y) && canWalkOn(getTileAt(pos.x, pos.y, town))) {
         e.x = pos.x;
         e.y = pos.y;
       }
