@@ -210,6 +210,8 @@ ultima4.main = (function() {
             frameLastCommand = frame;
             activeCommand = null;   // Command ready, no input neede
             console.writePrompt();
+            if(state.town != null)
+              moveInhabitants(state.town);
           } else  {
             activeCommand = command;  // Input needed
           }
@@ -304,10 +306,6 @@ ultima4.main = (function() {
       return true;
     };
 
-    function canWalkOn(tile) {
-      return tilesCanWalkOn.indexOf(tile) != -1;
-    }
-
     function canMoveTo(tile) {
       var difficulty = terrainDifficulty[tile];
       if (difficulty) {
@@ -317,6 +315,11 @@ ultima4.main = (function() {
       }
     }
   }
+
+  function canWalkOn(tile) {
+    return tilesCanWalkOn.indexOf(tile) != -1;
+  }
+
 
   function randomIntBetween(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -337,6 +340,25 @@ ultima4.main = (function() {
 
   function getDirKeyName(key) {
     return dirKeyNames[key];
+  }
+
+  function initInhabitants(town) {
+    townInhabitants[town].forEach(function(e) {
+      e.x = e.iniX;
+      e.y = e.iniY;
+    });
+  }
+
+  function moveInhabitants(town) {
+    townInhabitants[town].filter(function(e) {
+      return e.type == 1 && randomIntBetween(0, 1) == 0;
+    }).forEach(function(e) {
+      var pos = mutatePosByDir({x: e.x, y: e.y}, randomIntBetween(0, 3));
+      if(canWalkOn(getTileAt(pos.x, pos.y, town))) {
+        e.x = pos.x;
+        e.y = pos.y;
+      }
+    });
   }
 
   function commandEnter() {
@@ -360,6 +382,7 @@ ultima4.main = (function() {
           state.x = 1;
           state.y = 15;
           s += "village!\n\n" + padStringCenter(loc.name);
+          initInhabitants(state.town);
           break;
         case tileType.town:
           state.town = loc.id;
@@ -368,6 +391,7 @@ ultima4.main = (function() {
           state.x = 1;
           state.y = 15;
           s += "towne!\n\n" + padStringCenter(loc.name);
+          initInhabitants(state.town);
           break;
         case tileType.castle:
         case tileType.LBCastleCenter:
@@ -377,6 +401,7 @@ ultima4.main = (function() {
           state.x = 15;
           state.y = 30;
           s += "castle!\n\n" + padStringCenter(loc.name);
+          initInhabitants(state.town);
           break;
         }
       } else
@@ -602,11 +627,18 @@ ultima4.main = (function() {
     for (var j=0; j<=16; j++) {
       var a = new Array();
       for(var i=0; i<32; i++) {
-        var tile = parseHexByte(s, j*256+i*8);
+        var p = j*256 + i*8;
+        var tile = parseHexByte(s, p);
         if(tile != 0) 
           a.push({tile: tile, 
-                  x: parseHexByte(s, j*256+i*8+1),
-                  y: parseHexByte(s, j*256+i*8+2)});
+                  x: parseHexByte(s, p+1),
+                  y: parseHexByte(s, p+2),
+                  iniTile: parseHexByte(s, p+3),
+                  iniX: parseHexByte(s, p+4),
+                  iniY: parseHexByte(s, p+5),
+                  type: parseHexByte(s, p+6),
+                  talkType: parseHexByte(s, p+7),
+                 });
       }
       towns[j] = a;
     }
@@ -648,10 +680,10 @@ ultima4.main = (function() {
 
   var dirPosMutations = (function() {
     var m = {};
-    m[keys.up] = { x: 0, y: -1 };
-    m[keys.down] = { x: 0, y: +1 };
-    m[keys.left] = { x: -1, y: 0 };
-    m[keys.right] = { x: +1, y: 0};
+    m[0] = m[keys.up] = { x: 0, y: -1 };
+    m[1] = m[keys.right] = { x: +1, y: 0};
+    m[2] = m[keys.down] = { x: 0, y: +1 };
+    m[3] = m[keys.left] = { x: -1, y: 0 };
     return m;
   }());
 
