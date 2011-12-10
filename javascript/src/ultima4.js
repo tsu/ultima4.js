@@ -347,7 +347,7 @@ ultima4.main = (function() {
     townInhabitants[town].filter(function(e) {
       return e.type == 1 && randomIntBetween(0, 1) == 0;
     }).forEach(function(e) {
-      var pos = e.pos.clone().mutateByDir(randomIntBetween(0, 3));
+      var pos = e.pos.mutateByDir(randomIntBetween(0, 3));
       if(!pos.equals(state.pos) && canWalkOn(getTileAt(pos.x, pos.y, town))) 
         e.pos = pos;
     });
@@ -643,9 +643,9 @@ ultima4.main = (function() {
   var dirKeyNames = (function() {
     var m = {};
     m[0] = m[keys.up] = "North";
-    m[1] = m[keys.down] = "South";
-    m[2] = m[keys.left] = "West";
-    m[3] = m[keys.right] = "East";
+    m[1] = m[keys.right] = "East";
+    m[2] = m[keys.down] = "South";
+    m[3] = m[keys.left] = "West";
     return m;
   }());
 
