@@ -376,32 +376,17 @@ ultima4.main = (function() {
           s += "dungeon!\n\n" + padStringCenter(loc.name);
           break;
         case tileType.village:          
-          state.town = loc.id;
-          state.worldX = state.x;
-          state.worldY = state.y;
-          state.x = 1;
-          state.y = 15;
-          s += "village!\n\n" + padStringCenter(loc.name);
-          initInhabitants(state.town);
-          break;
         case tileType.town:
-          state.town = loc.id;
-          state.worldX = state.x;
-          state.worldY = state.y;
-          state.x = 1;
-          state.y = 15;
-          s += "towne!\n\n" + padStringCenter(loc.name);
-          initInhabitants(state.town);
-          break;
         case tileType.castle:
         case tileType.LBCastleCenter:
           state.town = loc.id;
           state.worldX = state.x;
           state.worldY = state.y;
-          state.x = 15;
-          state.y = 30;
-          s += "castle!\n\n" + padStringCenter(loc.name);
           initInhabitants(state.town);
+          var lt = locationTypes[type];          
+          state.x = lt.entryX;
+          state.y = lt.entryY;
+          s += lt.name + "!\n\n" + padStringCenter(loc.name);
           break;
         }
       } else
@@ -684,6 +669,14 @@ ultima4.main = (function() {
     m[1] = m[keys.right] = { x: +1, y: 0};
     m[2] = m[keys.down] = { x: 0, y: +1 };
     m[3] = m[keys.left] = { x: -1, y: 0 };
+    return m;
+  }());
+
+  var locationTypes = (function() {
+    var m = {};
+    m[tileType.village] = { entryX: 1, entryY: 15, name: "village" };
+    m[tileType.town] = { entryX: 1, entryY: 15, name: "towne" };
+    m[tileType.castle] =  m[tileType.LBCastleCenter] = { entryX: 15, entryY: 30, name: "castle" };
     return m;
   }());
 
