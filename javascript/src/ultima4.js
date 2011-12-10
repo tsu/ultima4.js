@@ -78,10 +78,9 @@ ultima4.main = (function() {
   function getInhabitantAt(x, y, town) {
     if (town!=null && town>=0 && town<=16) 
       return townInhabitants[town].filter(function(e) {
-        return e.x==x && e.y==y;
+        return e.pos.x==x && e.pos.y==y;
       })[0];
   }
-
 
   function drawChar(g, c, fgColor, bgColor, x, y) {
     if(c>=0 && c<=127) {
@@ -118,15 +117,9 @@ ultima4.main = (function() {
     var oy = 16 + 5*32;
     for (var y=-5; y<=5; y++) {
       for (var x=-5; x<=5; x++) {
-        var  tile = !isTileInLineOfSight(x, y, town) ? tileType.empty : getTileAt(mapX+x,mapY+y,town);
-        drawTile(g, tile, ox + x*32, oy + y*32, frame);
+        var tile = !isTileInLineOfSight(x, y, town) ? tileType.empty : getTileAt(mapX+x,mapY+y,town);
+        drawTile(g, x==0 && y==0 ? 31 : tile, ox + x*32, oy + y*32, frame);
       }
-    }
-
-    drawTile(g, 31, ox, oy);
-
-    function isInViewport(x, y) {
-      return x>=mapX-5 && x<=mapX+5 && y>=mapY-5 && y<=mapY+5;
     }
 
     function isTileInLineOfSight(x, y, town) {
@@ -246,7 +239,7 @@ ultima4.main = (function() {
       drawScreenFrames(g);
       hints.redrawScreenFrames = false;
     }
-    drawViewport(g, state.x, state.y, state.town, frame);
+    drawViewport(g, state.pos.x, state.pos.y, state.town, frame);
     if (hints.drawInfo) {
       drawText(g, "1-TSU      125G", palette[1], palette[0], 24*16, 1*16);
       drawText(g, "2-MKA      125G", palette[1], palette[0], 24*16, 2*16);
@@ -260,45 +253,47 @@ ultima4.main = (function() {
     }
   }
 
-  function mutatePosByDir(pos, dir) {
-    var m = dirPosMutations[dir];
-    return m ? { x: pos.x+=m.x, y: pos.y+=m.y } : pos;
+  function Pos(x, y) {
+    this.x = x;
+    this.y = y;
+    
+    function mutateByDir(dir) {
+      var m = dirPosMutations[dir];
+      return m ? new Pos(this.x+m.x, this.y+m.y) : this.clone();
+    }
+
+    function clone() {
+      return new Pos(this.x, this.y);
+    }
+
+    function equals(p) {
+      return p && this.x==p.x && this.y==p.y;
+    }
+
+    return {
+      x: x,
+      y: y,
+      mutateByDir: mutateByDir,
+      clone: clone,
+      equals: equals
+    }
   }
 
-  function mutateNorth(state) {
-    return { x: state.x, y: state.y - 1 };
-  }
-
-  function mutateEast(state) {
-    return { x: state.x + 1, y: state.y };
-  }
-
-  function mutateSouth(state) {
-    return { x: state.x, y: state.y + 1 };
-  }
-
-  function mutateWest(state) {
-    return { x: state.x - 1, y: state.y };
-  }
-
-  function moveCommand(mutator, displayName) {
+  function moveCommand(dir) {
     return function() {
-      var s = displayName;
-      var newState = mutator(state);
-      var tile = getTileAt(newState.x, newState.y, state.town);
-      if (canWalkOn(tile)) {
+      var s = dirKeyNames[dir];
+      var newPos = state.pos.mutateByDir(dir);
+      var tile = getTileAt(newPos.x, newPos.y, state.town);
+      if (canWalkOn(tile)) 
         if (canMoveTo(tile)) {
-          state.x = newState.x;
-          state.y = newState.y;
+          state.pos = newPos;
         } else {
           s += "\nSLOW PROGRESS!";
         }
-      } else {
-        s += "\nBLOCKED!";
-      }
-      if (state.town!=null && (state.x<0 || state.x>31 || state.y<0 || state.y>31)) {
-        state.x = state.worldX;
-        state.y = state.worldY
+      else 
+        s += "\nBLOCKED!";        
+      if (state.town!=null && (state.pos.x<0 || state.pos.x>31 || state.pos.y<0 || state.pos.y>31)) {
+        state.pos = state.worldPos;
         state.town = null;
         s += "\nLEAVING...";
       } 
@@ -344,8 +339,7 @@ ultima4.main = (function() {
 
   function initInhabitants(town) {
     townInhabitants[town].forEach(function(e) {
-      e.x = e.iniX;
-      e.y = e.iniY;
+      e.pos = e.iniPos.clone();
     });
   }
 
@@ -353,19 +347,17 @@ ultima4.main = (function() {
     townInhabitants[town].filter(function(e) {
       return e.type == 1 && randomIntBetween(0, 1) == 0;
     }).forEach(function(e) {
-      var pos = mutatePosByDir({x: e.x, y: e.y}, randomIntBetween(0, 3));
-      if(!(pos.x==state.x && pos.y==state.y) && canWalkOn(getTileAt(pos.x, pos.y, town))) {
-        e.x = pos.x;
-        e.y = pos.y;
-      }
+      var pos = e.pos.clone().mutateByDir(randomIntBetween(0, 3));
+      if(!pos.equals(state.pos) && canWalkOn(getTileAt(pos.x, pos.y, town))) 
+        e.pos = pos;
     });
   }
 
   function commandEnter() {
     var s = "Enter ";    
     if(state.town == null) {
-      var loc = getLocation(state.x, state.y);
-      var type = getTileAt(state.x, state.y, state.town);
+      var loc = getLocation(state.pos.x, state.pos.y);
+      var type = getTileAt(state.pos.x, state.pos.y, state.town);
       if(loc) {
         switch (type) {
         case tileType.shrine:
@@ -380,13 +372,10 @@ ultima4.main = (function() {
         case tileType.castle:
         case tileType.LBCastleCenter:
           state.town = loc.id;
-          state.worldX = state.x;
-          state.worldY = state.y;
+          state.worldPos = state.pos.clone();
           initInhabitants(state.town);
-          var lt = locationTypes[type];          
-          state.x = lt.entryX;
-          state.y = lt.entryY;
-          s += lt.name + "!\n\n" + padStringCenter(loc.name);
+          state.pos = locationTypes[type].entryPos.clone();
+          s += locationTypes[type].name + "!\n\n" + padStringCenter(loc.name);
           break;
         }
       } else
@@ -406,7 +395,7 @@ ultima4.main = (function() {
       var s, pos=null;
       if (isDirKey(key)) {
         s = getDirKeyName(key);
-        pos = mutatePosByDir( {x: state.x, y: state.y }, key);
+        pos = state.pos.mutateByDir(key);
       } else {
         s = String.fromCharCode(key);
       }        
@@ -593,8 +582,7 @@ ultima4.main = (function() {
   var tilesAnimated = [tileType.deepOcean, tileType.ocean, tileType.river];
 
   var state = {
-    x: 86,
-    y: 108,
+    pos: new Pos(86,108),
     town: null,
     food: 10000,
     gold: 200,
@@ -616,11 +604,9 @@ ultima4.main = (function() {
         var tile = parseHexByte(s, p);
         if(tile != 0) 
           a.push({tile: tile, 
-                  x: parseHexByte(s, p+1),
-                  y: parseHexByte(s, p+2),
+                  pos: new Pos(parseHexByte(s, p+1), parseHexByte(s, p+2)),
                   iniTile: parseHexByte(s, p+3),
-                  iniX: parseHexByte(s, p+4),
-                  iniY: parseHexByte(s, p+5),
+                  iniPos: new Pos(parseHexByte(s, p+4), parseHexByte(s, p+5)),
                   type: parseHexByte(s, p+6),
                   talkType: parseHexByte(s, p+7),
                  });
@@ -634,10 +620,10 @@ ultima4.main = (function() {
   var canvas = createCanvas();
   var commands = (function() {
     var map = {};
-    map[keys.up] = moveCommand(mutateNorth, "North");
-    map[keys.right] = moveCommand(mutateEast, "East");
-    map[keys.down] = moveCommand(mutateSouth, "South");
-    map[keys.left] = moveCommand(mutateWest, "West");
+    map[keys.up] = moveCommand(0);
+    map[keys.right] = moveCommand(1);
+    map[keys.down] = moveCommand(2);
+    map[keys.left] = moveCommand(3);
     map[keys.Space] = commandPass;
     map[keys.E] = commandEnter;
     map[keys.O] = commandOpen;
@@ -656,10 +642,10 @@ ultima4.main = (function() {
   
   var dirKeyNames = (function() {
     var m = {};
-    m[keys.up] = "North";
-    m[keys.down] = "South";
-    m[keys.left] = "West";
-    m[keys.right] = "East";
+    m[0] = m[keys.up] = "North";
+    m[1] = m[keys.down] = "South";
+    m[2] = m[keys.left] = "West";
+    m[3] = m[keys.right] = "East";
     return m;
   }());
 
@@ -674,9 +660,9 @@ ultima4.main = (function() {
 
   var locationTypes = (function() {
     var m = {};
-    m[tileType.village] = { entryX: 1, entryY: 15, name: "village" };
-    m[tileType.town] = { entryX: 1, entryY: 15, name: "towne" };
-    m[tileType.castle] =  m[tileType.LBCastleCenter] = { entryX: 15, entryY: 30, name: "castle" };
+    m[tileType.village] = { entryPos: new Pos(1, 15), name: "village" };
+    m[tileType.town] = { entryPos: new Pos(1, 15), name: "towne" };
+    m[tileType.castle] =  m[tileType.LBCastleCenter] = { entryPos: new Pos(15, 30), name: "castle" };
     return m;
   }());
 
