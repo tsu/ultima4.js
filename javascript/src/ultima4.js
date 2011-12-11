@@ -33,19 +33,22 @@ ultima4.gameData = (function() {
     return buf;
   }
 
+  function hexDecode(data) {
+    return data.match(/[0-9a-fA-F]{2}/g).map(function(e){
+      return parseInt(e, 16);
+    });
+  }
+
   return {
     tiles: tiles,
     worldMap: rleDecode(atob(rleMapData)),
-    font: font,
+    font: hexDecode(font),
     townMaps: rleDecode(atob(rleTownMaps)),
-    townInhabitants: townInhabitants
+    townInhabitants: hexDecode(townInhabitants)
   };
 }());
 
 ultima4.main = (function() {
-  function parseHexByte(s, n) {
-    return parseInt(s.substr(n*2, 2), 16);
-  }
 
   function getTileAt(x, y, town) {
     var tile = getInhabitantTileAt(x, y, town);
@@ -85,7 +88,7 @@ ultima4.main = (function() {
   function drawChar(g, c, fgColor, bgColor, x, y) {
     if(c>=0 && c<=127) {
       for (var row=0; row<8; row++) {
-        var b =  parseHexByte(ultima4.gameData.font, c*8 + row)
+        var b =  ultima4.gameData.font[c*8 + row];
         for (var i=7; i>=0; i--) {
           g.fillStyle = (b & (1<<i)) ? fgColor : bgColor;
           g.fillRect(x+8*2-(i+1)*2, y+row*2, 2, 2);
@@ -595,20 +598,20 @@ ultima4.main = (function() {
   var worldMap = ultima4.gameData.worldMap;
   var townMaps = ultima4.gameData.townMaps;
   var townInhabitants = (function() {
-    var s = ultima4.gameData.townInhabitants;
+    var data = ultima4.gameData.townInhabitants;
     var towns = new Array();
     for (var j=0; j<=16; j++) {
       var a = new Array();
       for(var i=0; i<32; i++) {
         var p = j*256 + i*8;
-        var tile = parseHexByte(s, p);
+        var tile = data[p];
         if(tile != 0) 
-          a.push({tile: tile, 
-                  pos: new Pos(parseHexByte(s, p+1), parseHexByte(s, p+2)),
-                  iniTile: parseHexByte(s, p+3),
-                  iniPos: new Pos(parseHexByte(s, p+4), parseHexByte(s, p+5)),
-                  type: parseHexByte(s, p+6),
-                  talkType: parseHexByte(s, p+7),
+          a.push({ tile: tile, 
+                   pos: new Pos(data[p+1], data[p+2]),
+                   iniTile: data[p+3],
+                   iniPos: new Pos(data[p+4], data[p+5]),
+                   type: data[p+6],
+                   talkType: data[p+7] 
                  });
       }
       towns[j] = a;
