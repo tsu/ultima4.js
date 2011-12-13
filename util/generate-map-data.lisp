@@ -49,6 +49,25 @@
   (ql:quickload "cl-base64"))
 
 
+(defun lzw-encode (lst)
+  "LZW encode byte values in list. Returns a list."
+  (let ((dict (make-hash-table :test 'equal))
+        (res)
+        (cur))
+    (dotimes (i 256)
+      (setf (gethash (list i) dict) i))
+    (dolist (val lst)
+      (when (and cur
+                 (not (gethash (cons val cur) dict)))
+        (setf (gethash (cons val cur) dict) 
+              (hash-table-count dict))
+        (push (gethash cur dict) res)
+        (setf cur nil))
+      (push val cur))
+    (push (gethash cur dict) res)
+    (nreverse res)))
+      
+        
 (defun seq-slice (seq n)
   "Slices sequence in slices with length of n. Returns a list of slices"
   (let ((res))
@@ -100,7 +119,7 @@
           (file-position in (* (+ 257 (* town 5)) 256))
           (read-sequence maps in :start (* 256 4 town) :end (+ (* 256 4 town) 1024)))
         maps))))
-  
+
 (defun rle-encode-byte (byte n)
   "Encode one run of n bytes. Returns a list of encoded bytes"
   (if (> (logand byte #x80) 0)
