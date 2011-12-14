@@ -48,7 +48,18 @@
 (let ((*standard-output* *error-output*))
   (ql:quickload "cl-base64"))
 
+(defun int-bit-vector (i n)
+  "Convert integer i to bit vector of n bits"
+  (let ((res (make-array n :element-type 'bit)))
+    (dotimes (b n res)
+      (setf (bit res b) 
+            (logand (ash i (- b (1- n))) 1)))))
 
+(defun bit-vector-int (bv)
+  "Convert bit vector to integer"
+  (reduce #'(lambda (a b) (+ (ash a 1) b)) 
+          bv))
+  
 (defun lzw-encode (lst)
   "LZW encode byte values in list. Returns a list."
   (let ((dict (make-hash-table :test 'equal))
