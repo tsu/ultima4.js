@@ -38,6 +38,10 @@
 ;;    21      1 0e
 ;;    22      1 0d
 
+;; Notes on LZW compression and bit packing 
+;; (bit-vector-list (reduce #'(lambda (a b) (concatenate 'bit-vector a b)) (mapcar #'(lambda (a) (int-bit-vector (char-code a) 13)) (coerce "TOBEORNOTTOBEORTOBEORNOT" 'list))))
+
+
 ;; Quiclisp setup, normally in .sbclrc, which is not read with --script
 #-quicklisp
 (let ((quicklisp-init (merge-pathnames "quicklisp/setup.lisp"
@@ -59,7 +63,15 @@
   "Convert bit vector to integer"
   (reduce #'(lambda (a b) (+ (ash a 1) b)) 
           bv))
-  
+
+(defun bit-vector-list (bv &optional (n 8))
+  "Convert bit-vector to list of integers (with n bits). Length of bv must be multiple of n."
+  (if (zerop (mod (length bv) n))
+      (let ((res))
+        (dotimes (i (/ (length bv) n) (nreverse res))
+          (push (bit-vector-int (subseq bv (* i n) (* (1+ i) n))) 
+                res)))))
+
 (defun lzw-encode (lst)
   "LZW encode byte values in list. Returns a list."
   (let ((dict (make-hash-table :test 'equal))
@@ -191,6 +203,16 @@
       ((string= fmt "rle-base64")
        (format t "~A~%"
                (cl-base64:usb8-array-to-base64-string (rle-encode data) :columns 76)))
+      ((string= fmt "lzw-base64")
+       (let ((data2 (reduce #'(lambda (a b) (concatenate 'bit-vector a b)) 
+                            (mapcar #'(lambda (a) (int-bit-vector a 13)) 
+                                    (lzw-encode (coerce data 'list))))))
+         (when (not (zerop (mod (length data2) 8)))
+           (setf data2 (concatenate 'bit-vector data2 (int-bit-vector 0 (- 8 (mod (length data2) 8))))))
+         (format t "~A~%" 
+                 (cl-base64:usb8-array-to-base64-string
+                  (coerce (bit-vector-list data2) 'vector) 
+                  :columns 76))))
       (t (error "unknown format: ~A" fmt)))))
 
 (defun do-town-maps (disk-name fmt)
@@ -220,7 +242,8 @@
            (format t "error: no such file: ~A~%" disk-name))
           ((and (string/= frmt "hex")
                 (string/= frmt "base64")
-                (string/= frmt "rle-base64"))
+                (string/= frmt "rle-base64")
+                (string/= frmt "lzw-base64"))
            (format t "error: unknown format: ~A~%" frmt))
            (t
             (cond
@@ -234,5 +257,5 @@
               '("where <format> is:"
                 "      hex         hex codes with two digits per byte, 256 bytes per line"
                 "      base64      base64 encoded bytes, 76 chars per line"
-                "      rle-base64  run length encoded + base64 encodede"))))
-
+                "      rle-base64  run length encoded + base64 encodede"
+                "      lzw-base64  LZW encoded + base64 encodede"))))
