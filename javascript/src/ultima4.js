@@ -125,16 +125,45 @@ ultima4.main = (function() {
       })[0];
   }
 
-  function drawChar(g, c, fgColor, bgColor, x, y) {
-    if(c>=0 && c<=127) {
-      for (var row=0; row<8; row++) {
-        var b =  ultima4.gameData.font[c*8 + row];
-        for (var i=7; i>=0; i--) {
-          g.fillStyle = (b & (1<<i)) ? fgColor : bgColor;
-          g.fillRect(x+8*2-(i+1)*2, y+row*2, 2, 2);
-        }        
-      }
+  function getFontImageData(c, fgColor, bgColor) {
+    var key = "font-"+ c +"-"+ fgColor +"-"+ bgColor;
+    var imgData = fontImageDataCache[key];
+    if (!imgData) {
+      var g = canvas.getContext("2d");
+      var bitmap = ultima4.gameData.font.slice(c*8, (c+1)*8);
+      imgData = createImageData(g, bitmap, 8, 8, fgColor, bgColor);
+      fontImageDataCache[key] = imgData;
+      window.console.log("font: "+ c);
     }
+    return imgData;
+  }
+
+  function createImageData(g, bitmap, width, height, fgColor, bgColor) {
+    var imgData = g.createImageData(width*2, height*2);
+    for (var y=0; y<height; y++) {
+      for (var x=0; x<width; x++) {
+        var b =  bitmap[y*width/8 + Math.floor(x/8)];
+        var color =  (b & (1<<(width-x-1))) ? fgColor : bgColor;
+        var c = parseInt(color.substring(1), 16);
+        setPixel(imgData, x*2, y*2, c);
+        setPixel(imgData, x*2+1, y*2, c);
+        setPixel(imgData, x*2, y*2+1, c);
+        setPixel(imgData, x*2+1, y*2+1, c);
+      } 
+    }
+    return imgData;
+
+    function setPixel(imgData, x, y, rgb) {
+      imgData.data[y*imgData.width*4 + x*4 + 0] = rgb >> 16 & 0xFF;
+      imgData.data[y*imgData.width*4 + x*4 + 1] = rgb >> 8 & 0xFF;
+      imgData.data[y*imgData.width*4 + x*4 + 2] = rgb & 0xFF;
+      imgData.data[y*imgData.width*4 + x*4 + 3] = 0xFF;
+    }
+  }
+
+  function drawChar(g, c, fgColor, bgColor, x, y) {
+    if(c>=0 && c<=127) 
+      g.putImageData(getFontImageData(c, fgColor, bgColor), x, y);
   }
 
   function drawText(g, s, fgColor, bgColor, x, y) {
@@ -299,26 +328,20 @@ ultima4.main = (function() {
   function Pos(x, y) {
     this.x = x;
     this.y = y;
-    
-    function mutateByDir(dir) {
-      var m = dirPosMutations[dir];
-      return m ? new Pos(this.x+m.x, this.y+m.y) : this.clone();
-    }
-
-    function clone() {
-      return new Pos(this.x, this.y);
-    }
-
-    function equals(p) {
-      return p && this.x==p.x && this.y==p.y;
-    }
 
     return {
       x: x,
       y: y,
-      mutateByDir: mutateByDir,
-      clone: clone,
-      equals: equals
+      mutateByDir: function (dir) {
+        var m = dirPosMutations[dir];
+        return m ? new Pos(this.x+m.x, this.y+m.y) : this.clone();
+      },
+      clone: function () {
+        return new Pos(this.x, this.y);
+      },
+      equals: function (p) {
+        return p && this.x==p.x && this.y==p.y;
+      }
     }
   }
 
@@ -770,6 +793,8 @@ ultima4.main = (function() {
     [6, 1, 24*16, 9*16, 16, 0, 15],
     [6, 1, 24*16, 11*16, 16, 0, 15],
     [4, 1, 39*16, 11*16, 0, 0, 1]];
+
+  var fontImageDataCache = {};
 
   var hints = {
     redrawScreenFrames: true,
