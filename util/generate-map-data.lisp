@@ -52,6 +52,20 @@
 (let ((*standard-output* *error-output*))
   (ql:quickload "cl-base64"))
 
+(defun flatten (lst)
+  "Flatten list"
+  (if lst
+      (if (atom lst)
+          (list lst)
+          (append (flatten (car lst)) 
+                  (flatten (cdr lst))))))
+
+(defun hash-table-list (ht &aux res)
+  "Converts hash table into list list ((k1 v1) (k2 v2) ... (kn vn))"
+  (maphash (lambda (k v) (push (list k v) res)) ht)
+  res)
+
+
 (defun int-bit-vector (i n)
   "Convert integer i to bit vector of n bits"
   (let ((res (make-array n :element-type 'bit)))
@@ -72,12 +86,12 @@
           (push (bit-vector-int (subseq bv (* i n) (* (1+ i) n))) 
                 res)))))
 
-(defun lzw-encode (lst)
+(defun lzw-encode (lst &optional (dict-initial-size 256))
   "LZW encode byte values in list. Returns a list."
   (let ((dict (make-hash-table :test 'equal))
         (res)
         (cur))
-    (dotimes (i 256)
+    (dotimes (i dict-initial-size)
       (setf (gethash (list i) dict) i))
     (dolist (val lst)
       (when (and cur
