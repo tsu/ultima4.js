@@ -129,26 +129,26 @@ ultima4.main = (function() {
     var key = "font-"+ c +"-"+ fgColor +"-"+ bgColor;
     var imgData = fontImageDataCache[key];
     if (!imgData) {
-      var g = canvas.getContext("2d");
       var bitmap = ultima4.gameData.font.slice(c*8, (c+1)*8);
-      imgData = createImageData(g, bitmap, 8, 8, fgColor, bgColor);
+      imgData = createImageData(bitmap, 8, 8, fgColor, bgColor);
       fontImageDataCache[key] = imgData;
       window.console.log("font: "+ c);
     }
     return imgData;
   }
 
-  function createImageData(g, bitmap, width, height, fgColor, bgColor) {
-    var imgData = g.createImageData(width*2, height*2);
+  function createImageData(bitmap, width, height, fgColor, bgColor) {
+    var imgData = canvas.getContext("2d").createImageData(width*2, height*2);
+    var fgRGB = parseInt(fgColor.substring(1), 16);
+    var bgRGB = parseInt(bgColor.substring(1), 16);
     for (var y=0; y<height; y++) {
       for (var x=0; x<width; x++) {
         var b =  bitmap[y*width/8 + Math.floor(x/8)];
-        var color =  (b & (1<<(width-x-1))) ? fgColor : bgColor;
-        var c = parseInt(color.substring(1), 16);
-        setPixel(imgData, x*2, y*2, c);
-        setPixel(imgData, x*2+1, y*2, c);
-        setPixel(imgData, x*2, y*2+1, c);
-        setPixel(imgData, x*2+1, y*2+1, c);
+        var rgb =  (b & (128 >> x%8)) ? fgRGB : bgRGB;
+        setPixel(imgData, x*2, y*2, rgb);
+        setPixel(imgData, x*2+1, y*2, rgb);
+        setPixel(imgData, x*2, y*2+1, rgb);
+        setPixel(imgData, x*2+1, y*2+1, rgb);
       } 
     }
     return imgData;
