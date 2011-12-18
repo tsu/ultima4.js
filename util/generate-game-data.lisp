@@ -1,19 +1,19 @@
 #!/usr/local/bin/sbcl --script
-;;;; generate ultima4 map data from d64 disk image
-;; Examples
-;;   ./generate-map-data.lisp ../c64u4/ULTIMA4C.D64 world hex
-;;   ./generate-map-data.lisp ../c64u4/ULTIMA4C.D64 world base64
-;;   ./generate-map-data.lisp ../c64u4/ULTIMA4B.D64 town rle-base64
+;;;; generate ultima4 game data from d64 disk images
 
-;;; Histogram of tile codes in ultima4 world map, which leads to run lenght 
-;;; encoding
+;; Examples
+;;   ./generate-game-data.lisp ../c64u4 world hex
+;;   ./generate-game-data.lisp ../c64u4 town lzw-base64
+
+;;; RLE encoding
 ;;     - if 7th bit is 0, then whole byte is the tile code
 ;;     - if 7th bit is 1, then
 ;;          bits 3..6  is the count 0..15
 ;;               if count == 0, then count is in the next byte (16..255)
 ;;               if next (2nd) byte is 0, then count=1 and code=3rd byte
 ;;          bits 0..2  is the tile code 0..7
-;;
+
+;;;; Histogram of tile codes in ultima4 world map, which leads to run lenght 
 ;;   Rank Count Tile
 ;;     1  34014 00
 ;;     2  10336 01
@@ -51,6 +51,12 @@
 
 (let ((*standard-output* *error-output*))
   (ql:quickload "cl-base64"))
+
+;; D64-image file names
+(defvar *program-disk* "ULTIMA4A.D64")
+(defvar *towne-disk* "ULTIMA4B.D64")
+(defvar *britannia-disk* "ULTIMA4C.D64")
+(defvar *underworld-disk* "ULTIMA4D.D64")
 
 (defun flatten (lst)
   "Flatten list"
@@ -204,88 +210,55 @@
           (setf prev byte))
         (emit prev count)
         buf)))
-		  
-(defun do-world-map (disk-name fmt)
-  "Read world map data from disk and output data in format fmt"
-  (let ((data (read-worldmap disk-name)))
-    (cond
 
-      ((string= fmt "hex")
-       (dotimes (y 256)
-         (format t "~{~2,'0X~}" 
-                 (coerce (subseq data 
-                                 (* y 256) 
-                                 (+ (* y 256) 256)) 
-                         'list)))
-       (format t "~%"))
-
-      ((string= fmt "base64")
-       (format t "~A~%"
-               (cl-base64:usb8-array-to-base64-string data)))
-
-      ((string= fmt "rle-base64")
-       (format t "~A~%" (cl-base64:usb8-array-to-base64-string (rle-encode data))))
-
-      ((string= fmt "lzw-base64")
-       (let ((bv (make-array 1024 :element-type 'bit :adjustable t :fill-pointer 0)))
-         (map nil #'(lambda (x) (bit-vector-push x bv))
-              (mapcar #'(lambda (a) (int-bit-vector a 13))
-                      (lzw-encode (coerce data 'list))))
-         (dotimes (i (- 8 (mod (length bv) 8)))
-           (bit-vector-push #*0 bv))
-         (format t "~A~%" (cl-base64:usb8-array-to-base64-string 
-                           (coerce (bit-vector-list bv) 'vector)))))
-
-      (t (error "unknown format: ~A" fmt)))))
-
-(defun do-town-maps (disk-name fmt)
-  "Read town maps data from disk and output data in format fmt"
-  (let ((data (read-town-maps disk-name)))
-    (cond
-      ((string= fmt "hex")
-       (format t "~{~2,'0X~}~%" 
-               (coerce data 'list)))
-      ((string= fmt "base64")
-       (format t "~A~%"
-               (cl-base64:usb8-array-to-base64-string data)))
-      ((string= fmt "rle-base64")
-       (format t "~A~%"
-               (cl-base64:usb8-array-to-base64-string (rle-encode data))))
-      ((string= fmt "lzw-base64")
-       (let ((bv (make-array 1024 :element-type 'bit :adjustable t :fill-pointer 0)))
-         (map nil #'(lambda (x) (bit-vector-push x bv))
-              (mapcar #'(lambda (a) (int-bit-vector a 12))
-                      (lzw-encode (coerce data 'list))))
-         (dotimes (i (- 8 (mod (length bv) 8)))
-           (bit-vector-push #*0 bv))
-         (format t "~A~%" (cl-base64:usb8-array-to-base64-string 
-                           (coerce (bit-vector-list bv) 'vector)))))
-
-      (t (error "unknown format: ~A" fmt)))))
-
+(defun encode-data (data fmt dict-size)
+  "Encode data in byte array with format fmt. Returns string"
+  (cond
+    ((string= fmt "hex")
+     (format nil "~{~2,'0X~}" (coerce data  'list)))    
+    ((string= fmt "base64")
+     (cl-base64:usb8-array-to-base64-string data))
+    ((string= fmt "rle-base64")
+     (cl-base64:usb8-array-to-base64-string (rle-encode data)))
+    ((string= fmt "lzw-base64")
+     (let ((bv (make-array 1024 :element-type 'bit :adjustable t :fill-pointer 0)))
+       (map nil #'(lambda (x) (bit-vector-push x bv))
+            (mapcar #'(lambda (a) (int-bit-vector a dict-size))
+                    (lzw-encode (coerce data 'list))))
+       (dotimes (i (- 8 (mod (length bv) 8)))
+         (bit-vector-push #*0 bv))
+       (cl-base64:usb8-array-to-base64-string 
+                         (coerce (bit-vector-list bv) 'vector))))
+    (t (error "unknown format: ~A" fmt))))
 
 ;;; Startup from command line
 (let ((argv sb-ext:*posix-argv*))
   (if (> (length argv) 3)
-      (let* ((disk-name (nth 1 argv))
+      (let* ((disk-dir (nth 1 argv))
              (type (nth 2 argv))
-             (frmt (nth 3 argv)))
+             (frmt (nth 3 argv))
+             (disk-name (concatenate 
+                         'string disk-dir "/"
+                         (cond 
+                           ((string= type "world") *britannia-disk*)
+                           ((string= type "town") *towne-disk*)))))
         (cond 
           ((not (probe-file disk-name))
            (format t "error: no such file: ~A~%" disk-name))
           ((not (find frmt '("hex" "base64" "rle-base64" "lzw-base64") :test 'equal))
            (format t "error: unknown format: ~A~%" frmt))
            (t
-            (cond
-              ((string= type "world")
-               (do-world-map disk-name frmt))
-              ((string= type "town")
-               (do-town-maps disk-name frmt))
-              (t 
-               (format t "error: uknown type (not world or town): ~A~%" type))))))
-      (format t "usage: generate-map-data.lisp <britannia/towne-disk> [world|town] <format>~%~{~A~%~}"
+            (format t "~A~%"
+                    (cond
+                      ((string= type "world")
+                       (encode-data (read-worldmap disk-name) frmt 13))
+                      ((string= type "town")
+                       (encode-data (read-town-maps disk-name) frmt 12))                      
+                      (t 
+                       (format t "error: uknown type: ~A~%" type)))))))
+      (format t "usage: generate-game-data.lisp <d64-directory> [ world | town ] <format>~%~{~A~%~}"
               '("where <format> is:"
-                "      hex         hex codes with two digits per byte, 256 bytes per line"
-                "      base64      base64 encoded bytes, 76 chars per line"
-                "      rle-base64  run length encoded + base64 encodede"
-                "      lzw-base64  LZW encoded + base64 encodede"))))
+                "      hex         hex codes with two digits per byte"
+                "      base64      base64 encoded bytes"
+                "      rle-base64  run length  + base64 encoded"
+                "      lzw-base64  LZW + base64 encoded"))))
