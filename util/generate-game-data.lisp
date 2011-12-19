@@ -168,6 +168,15 @@
           (read-sequence maps in :start (* 256 4 town) :end (+ (* 256 4 town) 1024)))
         maps))))
 
+(defun read-font  (filename)
+  "Read font data"
+  (when (probe-file filename)
+    (with-open-file (in filename :element-type '(unsigned-byte 8))
+      (file-position in (* 256 246))
+      (let ((data (make-array 1024 :element-type '(unsigned-byte 8))))
+        (read-sequence data in)
+        data))))
+
 (defun rle-encode-byte (byte n)
   "Encode one run of n bytes. Returns a list of encoded bytes"
   (if (> (logand byte #x80) 0)
@@ -241,7 +250,8 @@
                          'string disk-dir "/"
                          (cond 
                            ((string= type "world") *britannia-disk*)
-                           ((string= type "town") *towne-disk*)))))
+                           ((string= type "town") *towne-disk*)
+                           ((string= type "font") *program-disk*)))))
         (cond 
           ((not (probe-file disk-name))
            (format t "error: no such file: ~A~%" disk-name))
@@ -253,10 +263,12 @@
                       ((string= type "world")
                        (encode-data (read-worldmap disk-name) frmt 13))
                       ((string= type "town")
-                       (encode-data (read-town-maps disk-name) frmt 12))                      
+                       (encode-data (read-town-maps disk-name) frmt 12))
+                      ((string= type "font")
+                       (encode-data (read-font disk-name) frmt 10))
                       (t 
                        (format t "error: uknown type: ~A~%" type)))))))
-      (format t "usage: generate-game-data.lisp <d64-directory> [ world | town ] <format>~%~{~A~%~}"
+      (format t "usage: generate-game-data.lisp <d64-directory> [ world | town | font ] <format>~%~{~A~%~}"
               '("where <format> is:"
                 "      hex         hex codes with two digits per byte"
                 "      base64      base64 encoded bytes"
