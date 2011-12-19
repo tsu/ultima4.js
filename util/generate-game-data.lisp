@@ -4,6 +4,8 @@
 ;; Examples
 ;;   ./generate-game-data.lisp ../c64u4 world hex
 ;;   ./generate-game-data.lisp ../c64u4 town lzw-base64
+;;   ./generate-game-data.lisp ../c64u4 font lzw-base64 
+;;   ./generate-game-data.lisp ../c64u4 inhabitant lzw-base64  
 
 ;;; RLE encoding
 ;;     - if 7th bit is 0, then whole byte is the tile code
@@ -168,13 +170,26 @@
           (read-sequence maps in :start (* 256 4 town) :end (+ (* 256 4 town) 1024)))
         maps))))
 
-(defun read-font  (filename)
+(defun read-font (filename)
   "Read font data"
   (when (probe-file filename)
     (with-open-file (in filename :element-type '(unsigned-byte 8))
       (file-position in (* 256 246))
       (let ((data (make-array 1024 :element-type '(unsigned-byte 8))))
         (read-sequence data in)
+        data))))
+
+(defun read-inhabitant (filename)
+  "Read town inhabitant data"
+  (when (probe-file filename)
+    (with-open-file (in filename :element-type '(unsigned-byte 8))
+      (let ((data (make-array (* 256 17) :element-type '(unsigned-byte 8))))
+        (dotimes (town 17)
+          (file-position in (+ (* 256 (+ 257 4 (* 5 town)))))
+          (dotimes (j 8) 
+            (dotimes (i 32)
+              (setf (aref data (+ (* 256 town) (* i 8) j)) 
+                    (read-byte in)))))
         data))))
 
 (defun rle-encode-byte (byte n)
@@ -251,7 +266,8 @@
                          (cond 
                            ((string= type "world") *britannia-disk*)
                            ((string= type "town") *towne-disk*)
-                           ((string= type "font") *program-disk*)))))
+                           ((string= type "font") *program-disk*)
+                           ((string= type "inhabitant") *towne-disk*)))))
         (cond 
           ((not (probe-file disk-name))
            (format t "error: no such file: ~A~%" disk-name))
@@ -266,10 +282,13 @@
                        (encode-data (read-town-maps disk-name) frmt 12))
                       ((string= type "font")
                        (encode-data (read-font disk-name) frmt 10))
+                      ((string= type "inhabitant")
+                       (encode-data (read-inhabitant disk-name) frmt 11))
                       (t 
                        (format t "error: uknown type: ~A~%" type)))))))
-      (format t "usage: generate-game-data.lisp <d64-directory> [ world | town | font ] <format>~%~{~A~%~}"
-              '("where <format> is:"
+      (format t "~%~{~A~%~}"
+              '("usage: generate-game-data.lisp <d64-directory> [ world | town | font | inhabitant ] <format>"
+                "where <format> is:"
                 "      hex         hex codes with two digits per byte"
                 "      base64      base64 encoded bytes"
                 "      rle-base64  run length  + base64 encoded"
