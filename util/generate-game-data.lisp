@@ -6,6 +6,7 @@
 ;;   ./generate-game-data.lisp ../c64u4 town lzw-base64
 ;;   ./generate-game-data.lisp ../c64u4 font lzw-base64 
 ;;   ./generate-game-data.lisp ../c64u4 inhabitant lzw-base64  
+;;   ./generate-game-data.lisp ../c64u4 talk lzw-base64
 
 ;;; RLE encoding
 ;;     - if 7th bit is 0, then whole byte is the tile code
@@ -192,6 +193,15 @@
                     (read-byte in)))))
         data))))
 
+(defun read-talk (filename)
+  "Read talk data from towne disk"
+  (when (probe-file filename)
+    (with-open-file (in filename :element-type '(unsigned-byte 8))
+      (file-position in 256)
+      (let ((data (make-array (* 256 256) :element-type '(unsigned-byte 8))))
+        (read-sequence data in)
+        data))))
+
 (defun rle-encode-byte (byte n)
   "Encode one run of n bytes. Returns a list of encoded bytes"
   (if (> (logand byte #x80) 0)
@@ -267,7 +277,8 @@
                            ((string= type "world") *britannia-disk*)
                            ((string= type "town") *towne-disk*)
                            ((string= type "font") *program-disk*)
-                           ((string= type "inhabitant") *towne-disk*)))))
+                           ((string= type "inhabitant") *towne-disk*)
+                           ((string= type "talk") *towne-disk*)))))
         (cond 
           ((not (probe-file disk-name))
            (format t "error: no such file: ~A~%" disk-name))
@@ -284,10 +295,12 @@
                        (encode-data (read-font disk-name) frmt 10))
                       ((string= type "inhabitant")
                        (encode-data (read-inhabitant disk-name) frmt 11))
+                      ((string= type "talk")
+                       (encode-data (read-talk disk-name) frmt 15))
                       (t 
                        (format t "error: uknown type: ~A~%" type)))))))
       (format t "~%~{~A~%~}"
-              '("usage: generate-game-data.lisp <d64-directory> [ world | town | font | inhabitant ] <format>"
+              '("usage: generate-game-data.lisp <d64-directory> [ world | town | font | inhabitant | talk ] <format>"
                 "where <format> is:"
                 "      hex         hex codes with two digits per byte"
                 "      base64      base64 encoded bytes"
