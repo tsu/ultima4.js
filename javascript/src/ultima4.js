@@ -261,45 +261,53 @@ ultima4.main = (function() {
 
   function update() {
     var time = new Date().getTime();
-    var wasWork = false;
+
     if (key == keys.F1)
       isPause = !isPause;
     if (!isPause) {     
       frame++;
-      if(frame > frameLastCommand + 32*4)
-        key = keys.Space;
-      if(key) {
-        window.console.log("update(): frame: "+ frame + ", key: "+ key);
-        var command = activeCommand ? activeCommand : commands[key];
-        if (command) {
-          if(command(activeCommand ? key : null)) {
-            round++;
-            frameLastCommand = frame;
-            activeCommand = null;   // Command ready, no input neede
-            console.writePrompt();
-            if(state.town != null)
-              moveInhabitants(state.town);
-          } else  {
-            activeCommand = command;  // Input needed
-          }
-        } else {
-          if (key != keys.F1) {
-            console.write("WHAT?\n\n");
-            console.writePrompt();
-          }
-        }
-        wasWork = true;
-      } else
-        console.drawCursor(canvas.getContext("2d"));      
+      if (state.conversation)
+        state.conversation.processKey(key);
+      else {
+        if(frame > frameLastCommand + 32*4)
+          key = keys.space;
+        processCommand(key);
+      } 
       if (openDoor && round>openDoor.openRound+4)
         openDoor = null;
       repaint();
     }
     key = null;
     time = new Date().getTime() - time;
-    if (wasWork)
-      window.console.log("frame time: "+ time +" ms");
+    //window.console.log("frame time: "+ time +" ms");
     setTimeout(update, Math.max(50, frameTimeMs - time));
+  }
+
+
+  function processCommand(key) {
+    if (key) {
+      window.console.log("update(): frame: "+ frame + ", key: "+ key);
+      var command = activeCommand ? activeCommand : commands[key];
+      if (command) {
+        if(command(activeCommand ? key : null)) {
+          round++;
+          frameLastCommand = frame;
+          activeCommand = null;   // Command ready, no input neede
+          if (!state.conversation) {
+            console.writePrompt();
+            if(state.town != null)
+              moveInhabitants(state.town);
+          }
+        } else  {
+          activeCommand = command;  // Input needed
+        }
+      } else {
+        if (key != keys.F1) {
+          console.write("WHAT?\n\n");
+          console.writePrompt();
+        }
+      }
+    }
   }
 
   function repaint() {
@@ -313,7 +321,6 @@ ultima4.main = (function() {
       drawScreenFrames(g);
       hints.redrawScreenFrames = false;
     }
-    drawViewport(g, state.pos.x, state.pos.y, state.town, frame);
     if (hints.drawInfo) {
       drawText(g, "1-TSU      125G", palette[1], palette[0], 24*16, 1*16);
       drawText(g, "2-MKA      125G", palette[1], palette[0], 24*16, 2*16);
@@ -325,6 +332,8 @@ ultima4.main = (function() {
       console.draw(g);
       hints.drawConsole = false;
     }
+    drawViewport(g, state.pos.x, state.pos.y, state.town, frame);
+    console.drawCursor(g);
   }
 
   function Pos(x, y) {
@@ -346,6 +355,34 @@ ultima4.main = (function() {
       }
     }
   }
+
+  function Conversation(talkEntry) {
+    this.talkEntry = talkEntry;
+    this.inputString = "";
+
+    function processKey(key) {
+      if (key) {
+        switch (key) {
+        case keys.enter:
+          state.conversation = null;
+          console.write("\n\n"+ talkEntry.pronoun +" SAYS: BYE.\n\n");
+          console.writePrompt();
+          break;
+        default:
+          this.inputString += String.fromCharCode(key);
+          console.write(String.fromCharCode(key));
+          window.console.log("talking to: "+ this.talkEntry.name +", input: "+ this.inputString);
+        }
+      }
+    }
+    
+    return {
+      talkEntry: this.talkEntry,
+      inputString: this.inputString, 
+      processKey: processKey
+    }
+  }
+
 
   function moveCommand(dir) {
     return function() {
@@ -505,6 +542,8 @@ ultima4.main = (function() {
           if (randomIntBetween(0,1) == 0) {
             console.write(talk.pronoun +" SAYS: I AM\n" + talk.name + "\n\n");
           }
+          console.write("Your interests:\n?");
+          state.conversation = new Conversation(talk);
         } else {
           console.write("\nFUNNY, NO\nRESPONSE!\n\n");
         }
@@ -617,7 +656,8 @@ ultima4.main = (function() {
   }
 
   var keys = {
-    Space: 32,
+    enter: 13,
+    space: 32,
     up: 38,
     left: 37,
     down: 40,
@@ -680,9 +720,9 @@ ultima4.main = (function() {
   var state = {
     pos: new Pos(86,108),
     town: null,
+    conversation: null,
     food: 10000,
     gold: 200,
-    readInput: null
   };
 
   var palette = ["#000000", "#FDFEFC", "#BE1A24", "#30E6C6", "#B41AE2", "#1FD21E", "#211BAE", "#DFF60A", "#B84104", "#6A3304", "#FE4A57", "#424540", "#70746F", "#59FE59", "#5F53FE", "#A4A7A2"];
@@ -737,7 +777,7 @@ ultima4.main = (function() {
     map[keys.right] = moveCommand(1);
     map[keys.down] = moveCommand(2);
     map[keys.left] = moveCommand(3);
-    map[keys.Space] = commandPass;
+    map[keys.space] = commandPass;
     map[keys.E] = commandEnter;
     map[keys.O] = commandOpen;
     map[keys.T] = commandTalk;
