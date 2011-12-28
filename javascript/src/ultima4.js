@@ -266,9 +266,9 @@ ultima4.main = (function() {
       isPause = !isPause;
     if (!isPause) {     
       frame++;
-      if (state.conversation)
+      if (state.conversation) {
         state.conversation.processKey(key);
-      else {
+      } else {
         if(frame > frameLastCommand + 32*4)
           key = keys.space;
         processCommand(key);
@@ -339,51 +339,69 @@ ultima4.main = (function() {
   function Pos(x, y) {
     this.x = x;
     this.y = y;
-
-    return {
-      x: x,
-      y: y,
-      mutateByDir: function (dir) {
-        var m = dirPosMutations[dir];
-        return m ? new Pos(this.x+m.x, this.y+m.y) : this.clone();
-      },
-      clone: function () {
-        return new Pos(this.x, this.y);
-      },
-      equals: function (p) {
-        return p && this.x==p.x && this.y==p.y;
-      }
-    }
   }
+
+  Pos.prototype.mutateByDir = function (dir) {
+    var m = dirPosMutations[dir];
+    return m ? new Pos(this.x+m.x, this.y+m.y) : this.clone();
+  }
+
+  Pos.prototype.clone = function () {
+    return new Pos(this.x, this.y);
+  }
+
+  Pos.prototype.equals = function (p) {
+    return p && this.x==p.x && this.y==p.y;
+  }
+
 
   function Conversation(talkEntry) {
     this.talkEntry = talkEntry;
-    this.inputString = "";
-
-    function processKey(key) {
-      if (key) {
-        switch (key) {
-        case keys.enter:
+    this.keyword = "FOO";
+  }
+  
+  Conversation.prototype.processKey = function(key) {
+    if (key) {
+      switch (key) {
+      case keys.enter:
+        var s = console.getCurrentString();
+        switch (s) {
+        case "BYE":
+        case "":
           state.conversation = null;
-          console.write("\n\n"+ talkEntry.pronoun +" SAYS: BYE.\n\n");
+          console.write("\n\n"+ this.talkEntry.pronoun +" SAYS: BYE.\n\n");
           console.writePrompt();
           break;
+        case "NAME":
+          console.write("\n\n"+ this.talkEntry.pronoun +" SAYS: I AM\n" + this.talkEntry.name + "\n\n");
+          console.write("Your interests:\n?");
+          break;
+        case "LOOK":
+          console.write("\n\nYOU SEE A\n" + this.talkEntry.description + "\n\n");
+          console.write("Your interests:\n?");
+          break;
+        case "JOB":
+          console.write("\n\n"+ this.talkEntry.pronoun +" SAYS:\n" + this.talkEntry.job + "\n\n");
+          console.write("Your interests:\n?");
+          break;
         default:
-          this.inputString += String.fromCharCode(key);
-          console.write(String.fromCharCode(key));
-          window.console.log("talking to: "+ this.talkEntry.name +", input: "+ this.inputString);
+          console.write("\n\n"+ this.talkEntry.pronoun +" SAYS: THAT,\n");
+          console.write("I CANNOT HELP\nTHEE WITH\n\n");
+          console.write("Your interests:\n?");
+          break;
         }
+        break;
+      case keys.backspace:
+        console.deleteLastChar();
+        break;
+      default:
+        this.inputString += String.fromCharCode(key);
+        console.write(String.fromCharCode(key));
+        window.console.log("talking to: "+ this.talkEntry.name +", input: "+ this.inputString);
       }
     }
-    
-    return {
-      talkEntry: this.talkEntry,
-      inputString: this.inputString, 
-      processKey: processKey
-    }
   }
-
-
+  
   function moveCommand(dir) {
     return function() {
       var s = dirKeyNames[dir];
@@ -419,7 +437,6 @@ ultima4.main = (function() {
   function canWalkOn(tile) {
     return tilesCanWalkOn.indexOf(tile) != -1;
   }
-
 
   function randomIntBetween(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -611,11 +628,25 @@ ultima4.main = (function() {
       drawCursor(g);
     }
 
+    function getCurrentString() {
+      return lines[lines.length-1].slice(1);
+    }
+
+    function deleteLastChar() {
+      var s = lines[lines.length - 1];
+      if(s && s.length > 1) {
+        lines[lines.length-1] = s.substr(0, s.length-1);
+        hints.drawConsole = true;
+      }
+    }
+
     return {
       write: write,
       writePrompt: writePrompt,
       draw: draw,
-      drawCursor: drawCursor
+      drawCursor: drawCursor,
+      getCurrentString: getCurrentString,
+      deleteLastChar: deleteLastChar
     };
   }
 
@@ -656,6 +687,7 @@ ultima4.main = (function() {
   }
 
   var keys = {
+    backspace: 8,
     enter: 13,
     space: 32,
     up: 38,
