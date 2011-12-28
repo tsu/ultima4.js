@@ -268,19 +268,19 @@
                  (frmt (intern (string-upcase (nth 3 argv))))
                  (disk-name (concatenate 
                              'string disk-dir "/"
-                             (case type
+                             (ecase type
                                (world *britannia-disk*)
                                (town *towne-disk*)
                                (font *program-disk*)
                                (inhabitant *towne-disk*)
                                (talk *towne-disk*)))))
-            (format t "~A~%"
-                    (ecase type
-                      (world  (encode-data (read-worldmap disk-name) frmt 13))
-                      (town   (encode-data (read-town-maps disk-name) frmt 12))
-                      (font   (encode-data (read-font disk-name) frmt 10))
-                      (inhabitant     (encode-data (read-inhabitant disk-name) frmt 11))
-                      (talk (encode-data (read-talk disk-name) frmt 15)))))
+            (write-line
+             (ecase type
+               (world      (encode-data (read-worldmap disk-name) frmt 13))
+               (town       (encode-data (read-town-maps disk-name) frmt 12))
+               (font       (encode-data (read-font disk-name) frmt 10))
+               (inhabitant (encode-data (read-inhabitant disk-name) frmt 11))
+               (talk       (encode-data (read-talk disk-name) frmt 15)))))
         (error (e) (format t "error: ~A~%" e)))
       (format t "~%~{~A~%~}"
               '("usage: generate-game-data.lisp <d64-directory> [ world | town | font | inhabitant | talk ] <format>"
