@@ -554,6 +554,11 @@ ultima4.main = (function() {
     return true;
   }
 
+  function commandSearch() {
+    console.write("Search...\nNOTHING HERE!\n\n");
+    return true;
+  }
+
   function commandTalk(key) {
     if (key == null) {
       console.write("Talk-");
@@ -708,6 +713,7 @@ ultima4.main = (function() {
     F1: 112, 
     E: "E".charCodeAt(0),
     O: "O".charCodeAt(0),
+    S: "S".charCodeAt(0),
     T: "T".charCodeAt(0),
     V: "V".charCodeAt(0),
     Z: "Z".charCodeAt(0)
@@ -835,6 +841,7 @@ ultima4.main = (function() {
     map[keys.space] = commandPass;
     map[keys.E] = commandEnter;
     map[keys.O] = commandOpen;
+    map[keys.S] = commandSearch;
     map[keys.T] = commandTalk;
     map[keys.V] = commandVolume;
     return map;
