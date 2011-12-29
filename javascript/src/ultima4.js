@@ -357,7 +357,6 @@ ultima4.main = (function() {
 
   function Conversation(talkEntry) {
     this.talkEntry = talkEntry;
-    this.keyword = "FOO";
   }
   
   Conversation.prototype.processKey = function(key) {
@@ -384,10 +383,22 @@ ultima4.main = (function() {
           console.write("\n\n"+ this.talkEntry.pronoun +" SAYS:\n" + this.talkEntry.job + "\n\n");
           console.write("Your interests:\n?");
           break;
-        default:
-          console.write("\n\n"+ this.talkEntry.pronoun +" SAYS: THAT,\n");
-          console.write("I CANNOT HELP\nTHEE WITH\n\n");
+        case "HEALTH":
+          console.write("\n\n"+ this.talkEntry.pronoun +" SAYS:\n" + this.talkEntry.health + "\n\n");
           console.write("Your interests:\n?");
+          break;          
+        default:
+          if (s.substr(0, this.talkEntry.keyword1.length) == this.talkEntry.keyword1) {
+            console.write("\n\n"+ this.talkEntry.pronoun +" SAYS:\n"+ this.talkEntry.keywordReply1 +"\n\n");
+            console.write("Your interests:\n?");
+          } else if (s.substr(0, this.talkEntry.keyword2.length) == this.talkEntry.keyword2) {
+            console.write("\n\n"+ this.talkEntry.pronoun +" SAYS:\n"+ this.talkEntry.keywordReply2 +"\n\n");
+            console.write("Your interests:\n?");
+          } else {
+            console.write("\n\n"+ this.talkEntry.pronoun +" SAYS: THAT,\n");
+            console.write("I CANNOT HELP\nTHEE WITH\n\n");
+            console.write("Your interests:\n?");
+          }
           break;
         }
         break;
@@ -397,7 +408,7 @@ ultima4.main = (function() {
       default:
         this.inputString += String.fromCharCode(key);
         console.write(String.fromCharCode(key));
-        window.console.log("talking to: "+ this.talkEntry.name +", input: "+ this.inputString);
+        break;
       }
     }
   }
@@ -789,11 +800,23 @@ ultima4.main = (function() {
     for (var j=0; j<16; j++) {
       var a = [];
       for (var i=0; i<16; i++) {
-        var texts = bytesToStrings(data.slice((j*16+i)*256 + 1, (j*16+i)*256+256));
+        var p = (j*16 + i) * 256;
+        var texts = bytesToStrings(data.slice(p+1, p+240));
+        var keywords = bytesToStrings(data.slice(p+240, p+256))[0];
+        var questionTriggerIndex = data[p+252];
         a.push({ name: texts[0],
                  pronoun: texts[1],
                  description: texts[2],
-                 job: texts[3]
+                 job: texts[3],
+                 health: texts[4],
+                 keywordReply1: texts[5],
+                 keywordReply2: texts[6],
+                 question: texts[7],
+                 yesReply: texts[8],
+                 noReply: texts[9],
+                 keyword1: keywords.substr(0,6).split(" ")[0],
+                 keyword2: keywords.substr(6,6).split(" ")[0],
+                 questionTrigger: texts[questionTriggerIndex]
                });
       }
       towns[j] = a;
