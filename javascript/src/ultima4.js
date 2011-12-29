@@ -357,57 +357,98 @@ ultima4.main = (function() {
 
   function Conversation(talkEntry) {
     this.talkEntry = talkEntry;
+    this.questionState = 0;
   }
   
   Conversation.prototype.processKey = function(key) {
     if (key) {
-      switch (key) {
-      case keys.enter:
-        var s = console.getCurrentString();
-        switch (s) {
-        case "BYE":
-        case "":
-          state.conversation = null;
-          console.write("\n\n"+ this.talkEntry.pronoun +" SAYS: BYE.\n\n");
-          console.writePrompt();
-          break;
-        case "NAME":
-          console.write("\n\n"+ this.talkEntry.pronoun +" SAYS: I AM\n" + this.talkEntry.name + "\n\n");
-          console.write("Your interests:\n?");
-          break;
-        case "LOOK":
-          console.write("\n\nYOU SEE A\n" + this.talkEntry.description + "\n\n");
-          console.write("Your interests:\n?");
-          break;
-        case "JOB":
-          console.write("\n\n"+ this.talkEntry.pronoun +" SAYS:\n" + this.talkEntry.job + "\n\n");
-          console.write("Your interests:\n?");
-          break;
-        case "HEALTH":
-          console.write("\n\n"+ this.talkEntry.pronoun +" SAYS:\n" + this.talkEntry.health + "\n\n");
-          console.write("Your interests:\n?");
-          break;          
-        default:
-          if (s.substr(0, this.talkEntry.keyword1.length) == this.talkEntry.keyword1) {
-            console.write("\n\n"+ this.talkEntry.pronoun +" SAYS:\n"+ this.talkEntry.keywordReply1 +"\n\n");
-            console.write("Your interests:\n?");
-          } else if (s.substr(0, this.talkEntry.keyword2.length) == this.talkEntry.keyword2) {
-            console.write("\n\n"+ this.talkEntry.pronoun +" SAYS:\n"+ this.talkEntry.keywordReply2 +"\n\n");
-            console.write("Your interests:\n?");
-          } else {
-            console.write("\n\n"+ this.talkEntry.pronoun +" SAYS: THAT,\n");
-            console.write("I CANNOT HELP\nTHEE WITH\n\n");
-            console.write("Your interests:\n?");
+      switch (this.questionState) {
+      case 0:
+        switch (key) {
+        case keys.enter:
+          var s = console.getCurrentString();
+          var reply;
+          switch (s) {
+          case "BYE":
+          case "":
+            state.conversation = null;
+            console.write("\n\n"+ this.talkEntry.pronoun +" SAYS: BYE.\n\n");
+            break;
+          case "NAME":
+            console.write("\n\n"+ this.talkEntry.pronoun +" SAYS: I AM\n" + this.talkEntry.name + "\n\n");
+            break;
+          case "LOOK":
+            console.write("\n\nYOU SEE A\n" + this.talkEntry.description + "\n\n");
+            break;
+          case "JOB":
+            reply = this.talkEntry.job;
+            break;
+          case "HEALTH":
+            reply = this.talkEntry.health;
+            break;          
+          default:
+            if (s.substr(0, this.talkEntry.keyword1.length) == this.talkEntry.keyword1) 
+              reply = this.talkEntry.keywordReply1;
+            else if (s.substr(0, this.talkEntry.keyword2.length) == this.talkEntry.keyword2) 
+              reply = this.talkEntry.keywordReply2;
+            else 
+              console.write("\n\n"+ this.talkEntry.pronoun +" SAYS: THAT,\nI CANNOT HELP\nTHEE WITH\n\n");
+            break;
           }
+          if(reply) {
+            console.write("\n\n"+ this.talkEntry.pronoun +" SAYS:\n" + reply + "\n\n");
+            if (reply == this.talkEntry.questionTrigger)
+              this.questionState = 1;
+          }
+          if (state.conversation) {
+            if (this.questionState == 0)
+              console.write("Your interests:\n?");
+          } else
+            console.writePrompt();
+          break;
+        case keys.backspace:
+          console.deleteLastChar();
+          break;
+        default:
+          console.write(String.fromCharCode(key));
           break;
         }
         break;
-      case keys.backspace:
-        console.deleteLastChar();
+
+      case 1:
+        console.write(this.talkEntry.question +"\n\n");
+        console.write("You respond:\n?");
+        this.questionState = 2;
         break;
-      default:
-        this.inputString += String.fromCharCode(key);
-        console.write(String.fromCharCode(key));
+
+      case 2:
+        switch (key) {
+        case keys.enter:
+          var s = console.getCurrentString();
+          switch (s.charAt(0)) {
+          case "Y":
+            console.write("\n\n"+ this.talkEntry.pronoun + " SAYS:\n"+ this.talkEntry.yesReply +"\n\n");
+            console.write("Your interests:\n?");
+            this.questionState = 0;
+            break;
+          case "N":
+            console.write("\n\n"+ this.talkEntry.pronoun + " SAYS:\n"+ this.talkEntry.noReply +"\n\n");
+            console.write("Your interests:\n?");
+            this.questionState = 0;
+            break;
+          default:
+            console.write("\n\n"+ this.talkEntry.pronoun + " SAYS:\nYES, OR NO:\n\n");
+            console.write("You respond:\n?");
+            break;
+          }
+          break;
+        case keys.backspace:
+          console.deleteLastChar();
+          break;
+        default:
+          console.write(String.fromCharCode(key));
+          break;
+        }
         break;
       }
     }
