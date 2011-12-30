@@ -527,6 +527,16 @@ ultima4.main = (function() {
     });
   }
 
+  function commandDescend() {
+    if (getTileAt(state.pos.x, state.pos.y, state.town) == tileType.ladderDown) {
+      console.write("Descend to\nfirst floor!\n\n");
+      state.town = 0;
+      initInhabitants(state.town);
+    } else
+      console.write("Descend WHAT?\n\n");
+    return true;
+  }
+
   function commandEnter() {
     var s = "Enter ";    
     if(state.town == null) {
@@ -560,6 +570,16 @@ ultima4.main = (function() {
     return true;
   }
   
+  function commandKlimb() {
+    if (getTileAt(state.pos.x, state.pos.y, state.town) == tileType.ladderUp) {
+      console.write("Klimb to\nsecond floor!\n\n");
+      state.town = 16;
+      initInhabitants(state.town);
+    } else
+      console.write("Klimb WHAT?\n\n");
+    return true;
+  }
+
   function commandOpen(key) {
     if (key == null) {
       console.write("Open-");
@@ -752,7 +772,9 @@ ultima4.main = (function() {
     down: 40,
     right: 39,
     F1: 112, 
+    D: "D".charCodeAt(0),
     E: "E".charCodeAt(0),
+    K: "K".charCodeAt(0),
     O: "O".charCodeAt(0),
     S: "S".charCodeAt(0),
     T: "T".charCodeAt(0),
@@ -868,6 +890,7 @@ ultima4.main = (function() {
       }
       towns[j] = a;
     }
+    towns[16] = towns[0];  // 2nd floor of LB's castle
     return towns;
   }());
 
@@ -880,7 +903,9 @@ ultima4.main = (function() {
     map[keys.down] = moveCommand(2);
     map[keys.left] = moveCommand(3);
     map[keys.space] = commandPass;
+    map[keys.D] = commandDescend;
     map[keys.E] = commandEnter;
+    map[keys.K] = commandKlimb;
     map[keys.O] = commandOpen;
     map[keys.S] = commandSearch;
     map[keys.T] = commandTalk;
