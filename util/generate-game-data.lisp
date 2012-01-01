@@ -279,7 +279,7 @@
                (world      (encode-data (read-worldmap disk-name) frmt 13))
                (town       (encode-data (read-town-maps disk-name) frmt 12))
                (font       (encode-data (read-font disk-name) frmt 10))
-               (inhabitant (encode-data (read-inhabitant disk-name) frmt 11))
+               (inhabitant (encode-data (read-inhabitant disk-name) frmt 12))
                (talk       (encode-data (read-talk disk-name) frmt 15)))))
         (error (e) (format t "error: ~A~%" e)))
       (format t "~%~{~A~%~}"
