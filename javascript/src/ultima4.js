@@ -533,9 +533,14 @@ ultima4.main = (function() {
 
   function commandDescend() {
     if (getTileAt(state.pos.x, state.pos.y, state.town) == tileType.ladderDown) {
-      console.write("Descend to\nfirst floor!\n\n");
-      state.town = 0;
-      initInhabitants(state.town);
+      if (state.town==0 && state.pos.x==7 && state.pos.y==2) {
+        console.write("Descend into\nthe depths!\n\n");
+        // Enter dungeon
+      } else {
+        console.write("Descend to\nfirst floor!\n\n");
+        state.town = 0;
+        initInhabitants(state.town);
+      }
     } else
       console.write("Descend WHAT?\n\n");
     return true;
