@@ -117,8 +117,12 @@ ultima4.main = (function() {
   function getInhabitantTileAt(x, y, town) {
     var h = getInhabitantAt(x, y, town);
     if (h) 
-      return (h.tile>=0x20 && h.tile<=0x2F) || (h.tile>=0x50 && h.tile<=0x5F) ?
-      h.tile ^ randomIntBetween(0, 1) : h.tile;
+      if ((h.tile>=0x20 && h.tile<=0x2F) || (h.tile>=0x50 && h.tile<=0x5F)) {
+        return h.tile ^ randomIntBetween(0, 1);
+      } else if (h.tile>=0x90 && h.tile<=0xff) {
+        return h.tile & 0xFC | (frame & 3);
+      } else
+        return h.tile;
   }
 
   function getInhabitantAt(x, y, town) {
