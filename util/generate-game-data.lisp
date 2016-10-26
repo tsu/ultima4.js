@@ -1,4 +1,4 @@
-#!/usr/local/bin/sbcl --script
+#!/usr/bin/env /usr/local/bin/sbcl --script
 ;;;; generate ultima4 game data from d64 disk images
 
 ;; Examples

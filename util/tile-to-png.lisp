@@ -1,4 +1,4 @@
-#!/usr/local/bin/sbcl --script
+#!/usr/bin/env /usr/local/bin/sbcl --script
 ;;;; Read U4 tile and convert it to PNG  file
 ;; Examples
 ;;

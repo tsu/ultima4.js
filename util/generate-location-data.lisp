@@ -1,4 +1,4 @@
-#!/usr/local/bin/sbcl --script
+#!/usr/bin/env /usr/local/bin/sbcl --script
 ;;;; generate ultima4 location (town, castle, dungeon, ...) data from memory dump file
 ;; exxample:
 ;;    ./generate-location-data.lisp ../data/c64-memdump-u4-worldmap.dat 

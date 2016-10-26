@@ -1,4 +1,4 @@
-#!/usr/local/bin/sbcl --script
+#!/usr/bin/env /usr/local/bin/sbcl --script
 ;;;; Disassbmbler for 6502 binary files
 ;; Reads from stdout, or can be give a file from cmd line. 
 ;; Examples: 
